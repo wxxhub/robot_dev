@@ -669,8 +669,205 @@ void RobotisController::msgQueueThread()
     loop_rate.sleep();
 }
 
+void *RobotisController::timerThread(void *param)
+{
+  RobotisController *controller = (RobotisController *) param;
+  static struct timespec next_time;
+  static struct timespec curr_time;
 
+  // RCLCPP_DEBUG(robot_node_->get_logger(),"controller::thread_proc started");
 
+  clock_gettime(CLOCK_MONOTONIC, &next_time);
+
+  while (!controller->stop_timer_)
+  {
+    next_time.tv_sec += (next_time.tv_nsec + controller->robot_->getControlCycle() * 1000000) / 1000000000;
+    next_time.tv_nsec = (next_time.tv_nsec + controller->robot_->getControlCycle() * 1000000) % 1000000000;
+
+    controller->process();
+
+    clock_gettime(CLOCK_MONOTONIC, &curr_time);
+    long delta_nsec = (next_time.tv_sec - curr_time.tv_sec) * 1000000000 + (next_time.tv_nsec - curr_time.tv_nsec);
+    if (delta_nsec < -100000)
+    {
+      if (controller->DEBUG_PRINT == true)
+      {
+        fprintf(stderr, "[RobotisController::ThreadProc] NEXT TIME < CURR TIME.. (%f)[%ld.%09ld / %ld.%09ld]",
+                         delta_nsec / 1000000.0, (long )next_time.tv_sec, (long )next_time.tv_nsec,
+                         (long )curr_time.tv_sec, (long )curr_time.tv_nsec);
+      }
+
+      // next_time = curr_time + 3 msec
+      next_time.tv_sec = curr_time.tv_sec + (curr_time.tv_nsec + 3000000) / 1000000000;
+      next_time.tv_nsec = (curr_time.tv_nsec + 3000000) % 1000000000;
+    }
+
+    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_time, NULL);
+  }
+  return 0;
+}
+
+void RobotisController::startTimer()
+{
+  if (this->is_timer_running_ == true)
+    return;
+
+  if (this->gazebo_mode_ == true)
+  {
+    // create and start the thread
+    gazebo_thread_ = boost::thread(boost::bind(&RobotisController::gazeboTimerThread, this));
+  }
+  else
+  {
+    initializeSyncWrite();
+
+    for (auto& it : port_to_bulk_read_)
+    {
+      it.second->txPacket();
+    }
+
+    usleep(8 * 1000);
+
+    int error;
+    struct sched_param param;
+    pthread_attr_t attr;
+
+    pthread_attr_init(&attr);
+
+    error = pthread_attr_setschedpolicy(&attr, SCHED_RR);
+    if (error != 0)
+      RCLCPP_ERROR(robot_node_->get_logger(),"pthread_attr_setschedpolicy error = %d\n", error);
+    error = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    if (error != 0)
+      RCLCPP_ERROR(robot_node_->get_logger(),"pthread_attr_setinheritsched error = %d\n", error);
+
+    memset(&param, 0, sizeof(param));
+    param.sched_priority = 31;    // RT
+    error = pthread_attr_setschedparam(&attr, &param);
+    if (error != 0)
+      RCLCPP_ERROR(robot_node_->get_logger(),"pthread_attr_setschedparam error = %d\n", error);
+
+    // create and start the thread
+    if ((error = pthread_create(&this->timer_thread_, &attr, this->timerThread, this)) != 0)
+    {
+      RCLCPP_ERROR(robot_node_->get_logger(),"Creating timer thread failed!!");
+      exit(-1);
+    }
+  }
+
+  this->is_timer_running_ = true;
+}
+
+void RobotisController::stopTimer()
+{
+  int error = 0;
+
+  // set the flag to stop the thread
+  if (this->is_timer_running_)
+  {
+    this->stop_timer_ = true;
+
+    if (this->gazebo_mode_ == false)
+    {
+      // wait until the thread is stopped.
+      if ((error = pthread_join(this->timer_thread_, NULL)) != 0)
+        exit(-1);
+
+      for (auto& it : port_to_bulk_read_)
+      {
+        if (it.second != NULL)
+          it.second->rxPacket();
+      }
+
+      for (auto& it : port_to_sync_write_position_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_position_p_gain_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_position_i_gain_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_position_d_gain_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_velocity_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_velocity_p_gain_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_velocity_i_gain_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_velocity_d_gain_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+      for (auto& it : port_to_sync_write_current_)
+      {
+        if (it.second != NULL)
+          it.second->clearParam();
+      }
+    }
+    else
+    {
+      // wait until the thread is stopped.
+      gazebo_thread_.join();
+    }
+
+    this->stop_timer_ = false;
+    this->is_timer_running_ = false;
+  }
+}
+
+bool RobotisController::isTimerRunning()
+{
+  return this->is_timer_running_;
+}
+
+void RobotisController::loadOffset(const std::string path)
+{
+  YAML::Node doc;
+  try
+  {
+    doc = YAML::LoadFile(path.c_str());
+  } catch (const std::exception& e)
+  {
+    RCLCPP_WARN(robot_node_->get_logger(),"Fail to load offset yaml.");
+    return;
+  }
+
+  YAML::Node offset_node = doc["offset"];
+  if (offset_node.size() == 0)
+    return;
+
+  RCLCPP_INFO(robot_node_->get_logger(),"Load offsets...");
+  for (YAML::const_iterator it = offset_node.begin(); it != offset_node.end(); it++)
+  {
+    std::string joint_name = it->first.as<std::string>();
+    double offset = it->second.as<double>();
+
+    auto dxl_it = robot_->dxls_.find(joint_name);
+    if (dxl_it != robot_->dxls_.end())
+      dxl_it->second->dxl_state_->position_offset_ = offset;
+  }
+}
 
 
 

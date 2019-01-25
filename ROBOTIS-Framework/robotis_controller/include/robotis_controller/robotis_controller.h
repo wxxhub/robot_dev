@@ -125,7 +125,7 @@ public:
   void    setJointCtrlModuleCallback(const robotis_controller_msgs::msg::JointCtrlModule::SharedPtr msg);
   void    setCtrlModuleCallback(const std_msgs::msg::String::SharedPtr msg);
   void    enableOffsetCallback(const std_msgs::msg::Bool::SharedPtr msg);
-  
+
   bool    getJointCtrlModuleService(const std::shared_ptr<rmw_request_id_t> request_header,
                                     const std::shared_ptr<robotis_controller_msgs::srv::GetJointModule::Request> req,
                                     const std::shared_ptr<robotis_controller_msgs::srv::GetJointModule::Response> res);
