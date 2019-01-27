@@ -869,8 +869,75 @@ void RobotisController::loadOffset(const std::string path)
   }
 }
 
+void RobotisController::process()
+{
 
+}
 
+void RobotisController::addMotionModule(MotionModule *module)
+{
+  for (auto m_it = motion_modules_.begin(); m_it != motion_modules_.end(); m_it++)
+  {
+    if ((*m_it)->getModuleName() == module->getModuleName())
+    {
+      RCLCPP_ERROR(robot_node_->get_logger(),"Motion Module Name [%s] already exist !!", module->getModuleName().c_str());
+      return;
+    }
+  }
+
+  module->initialize(robot_->getControlCycle(), robot_);
+  motion_modules_.push_back(module);
+  motion_modules_.unique();
+}
+
+void RobotisController::removeMotionModule(MotionModule *module)
+{
+  motion_modules_.remove(module);
+}
+
+void RobotisController::addSensorModule(SensorModule *module)
+{
+  // check whether the module name already exists
+  for (auto m_it = sensor_modules_.begin(); m_it != sensor_modules_.end(); m_it++)
+  {
+    if ((*m_it)->getModuleName() == module->getModuleName())
+    {
+      RCLCPP_ERROR(robot_node_->get_logger(),"Sensor Module Name [%s] already exist !!", module->getModuleName().c_str());
+      return;
+    }
+  }
+
+  module->initialize(robot_->getControlCycle(), robot_);
+  sensor_modules_.push_back(module);
+  sensor_modules_.unique();
+}
+
+void RobotisController::removeSensorModule(SensorModule *module)
+{
+  sensor_modules_.remove(module);
+}
+
+void RobotisController::addRegulatorModule(RegulatorModule *module)
+{
+  // check whether the module name already exists
+  for (auto m_it = regulator_modules_.begin(); m_it != regulator_modules_.end(); m_it++)
+  {
+    if ((*m_it)->getModuleName() == module->getModuleName())
+    {
+      RCLCPP_ERROR(robot_node_->get_logger(),"Regulator Module Name [%s] already exist !!", module->getModuleName().c_str());
+      return;
+    }
+  }
+
+  module->initialize(robot_->getControlCycle(), robot_);
+  regulator_modules_.push_back(module);
+  regulator_modules_.unique();
+}
+
+void RobotisController::removeRegulatorModule(RegulatorModule *module)
+{
+  regulator_modules_.remove(module);
+}
 
 void RobotisController::writeControlTableCallback(const robotis_controller_msgs::msg::WriteControlTable::SharedPtr msg)
 {
@@ -984,3 +1051,313 @@ void RobotisController::syncWriteItemCallback(const robotis_controller_msgs::msg
     queue_mutex_.unlock();
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int RobotisController::ping(const std::string joint_name, uint8_t *error)
+{
+  return ping(joint_name, 0, error);
+}
+int RobotisController::ping(const std::string joint_name, uint16_t* model_number, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->ping(port_handler, dxl->id_, model_number, error);
+}
+
+int RobotisController::action(const std::string joint_name)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->action(port_handler, dxl->id_);
+}
+int RobotisController::reboot(const std::string joint_name, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->reboot(port_handler, dxl->id_, error);
+}
+int RobotisController::factoryReset(const std::string joint_name, uint8_t option, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->factoryReset(port_handler, dxl->id_, option, error);
+}
+
+int RobotisController::read(const std::string joint_name, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->readTxRx(port_handler, dxl->id_, address, length, data, error);
+}
+
+int RobotisController::readCtrlItem(const std::string joint_name, const std::string item_name, uint32_t *data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  ControlTableItem *item = dxl->ctrl_table_[item_name];
+  if (item == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  int result = COMM_NOT_AVAILABLE;
+  switch (item->data_length_)
+  {
+  case 1:
+  {
+    uint8_t read_data = 0;
+    result = pkt_handler->read1ByteTxRx(port_handler, dxl->id_, item->address_, &read_data, error);
+    if (result == COMM_SUCCESS)
+      *data = read_data;
+    break;
+  }
+  case 2:
+  {
+    uint16_t read_data = 0;
+    result = pkt_handler->read2ByteTxRx(port_handler, dxl->id_, item->address_, &read_data, error);
+    if (result == COMM_SUCCESS)
+      *data = read_data;
+    break;
+  }
+  case 4:
+  {
+    uint32_t read_data = 0;
+    result = pkt_handler->read4ByteTxRx(port_handler, dxl->id_, item->address_, &read_data, error);
+    if (result == COMM_SUCCESS)
+      *data = read_data;
+    break;
+  }
+  default:
+    break;
+  }
+  return result;
+}
+
+int RobotisController::read1Byte(const std::string joint_name, uint16_t address, uint8_t *data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->read1ByteTxRx(port_handler, dxl->id_, address, data, error);
+}
+
+int RobotisController::read2Byte(const std::string joint_name, uint16_t address, uint16_t *data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->read2ByteTxRx(port_handler, dxl->id_, address, data, error);
+}
+
+int RobotisController::read4Byte(const std::string joint_name, uint16_t address, uint32_t *data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->read4ByteTxRx(port_handler, dxl->id_, address, data, error);
+}
+
+int RobotisController::write(const std::string joint_name, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->writeTxRx(port_handler, dxl->id_, address, length, data, error);
+}
+
+int RobotisController::writeCtrlItem(const std::string joint_name, const std::string item_name, uint32_t data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  ControlTableItem *item = dxl->ctrl_table_[item_name];
+  if (item == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  int       result      = COMM_NOT_AVAILABLE;
+  uint8_t  *write_data  = new uint8_t[item->data_length_];
+  if (item->data_length_ == 1)
+  {
+    write_data[0] = (uint8_t) data;
+    result = pkt_handler->write1ByteTxRx(port_handler, dxl->id_, item->address_, data, error);
+  }
+  else if (item->data_length_ == 2)
+  {
+    write_data[0] = DXL_LOBYTE((uint16_t )data);
+    write_data[1] = DXL_HIBYTE((uint16_t )data);
+    result = pkt_handler->write2ByteTxRx(port_handler, dxl->id_, item->address_, data, error);
+  }
+  else if (item->data_length_ == 4)
+  {
+    write_data[0] = DXL_LOBYTE(DXL_LOWORD((uint32_t)data));
+    write_data[1] = DXL_HIBYTE(DXL_LOWORD((uint32_t)data));
+    write_data[2] = DXL_LOBYTE(DXL_HIWORD((uint32_t)data));
+    write_data[3] = DXL_HIBYTE(DXL_HIWORD((uint32_t)data));
+    result = pkt_handler->write4ByteTxRx(port_handler, dxl->id_, item->address_, data, error);
+  }
+  delete[] write_data;
+  return result;
+}
+
+int RobotisController::write1Byte(const std::string joint_name, uint16_t address, uint8_t data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->write1ByteTxRx(port_handler, dxl->id_, address, data, error);
+}
+
+int RobotisController::write2Byte(const std::string joint_name, uint16_t address, uint16_t data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->write2ByteTxRx(port_handler, dxl->id_, address, data, error);
+}
+
+int RobotisController::write4Byte(const std::string joint_name, uint16_t address, uint32_t data, uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->write4ByteTxRx(port_handler, dxl->id_, address, data, error);
+}
+
+int RobotisController::regWrite(const std::string joint_name, uint16_t address, uint16_t length, uint8_t *data,
+    uint8_t *error)
+{
+  if (isTimerStopped() == false)
+    return COMM_PORT_BUSY;
+
+  Dynamixel *dxl = robot_->dxls_[joint_name];
+  if (dxl == NULL)
+    return COMM_NOT_AVAILABLE;
+
+  dynamixel::PacketHandler *pkt_handler   = dynamixel::PacketHandler::getPacketHandler(dxl->protocol_version_);
+  dynamixel::PortHandler   *port_handler  = robot_->ports_[dxl->port_name_];
+
+  return pkt_handler->regWriteTxRx(port_handler, dxl->id_, address, length, data, error);
+}
+
