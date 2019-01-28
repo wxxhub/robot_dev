@@ -62,7 +62,7 @@ private:
   void gazeboTimerThread();
   void msgQueueThread();
   void setCtrlModuleThread(std::string ctrl_module);
-  void setJointCtrlModuleThread();
+  void setJointCtrlModuleThread(const robotis_controller_msgs::msg::JointCtrlModule::SharedPtr msg);
 
   bool isTimerStopped();
   void initializeSyncWrite();
