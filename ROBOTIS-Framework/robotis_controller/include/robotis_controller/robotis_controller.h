@@ -36,6 +36,12 @@ enum ControllerMode
 
 class RobotisController : public Singleton<RobotisController>
 {
+public:
+  RobotisController();
+
+  bool    initialize(const std::string robot_file_path, const std::string init_file_path);
+  void    initializeDevice(const std::string init_file_path);
+
 private:
   rclcpp::Node::SharedPtr robot_node_;
 
@@ -59,13 +65,14 @@ private:
 
   std::map<std::string, double> sensor_result_;
 
+  void initializeSyncWrite();
+
   void gazeboTimerThread();
   void msgQueueThread();
   void setCtrlModuleThread(std::string ctrl_module);
   void setJointCtrlModuleThread(const robotis_controller_msgs::msg::JointCtrlModule::SharedPtr msg);
 
   bool isTimerStopped();
-  void initializeSyncWrite();
 
 public:
   bool  DEBUG_PRINT;
@@ -98,11 +105,14 @@ public:
 
   static void *timerThread(void *param);
 
-  RobotisController();
+  void    startTimer();
+  void    stopTimer();
+  bool    isTimerRunning();
 
-  bool    initialize(const std::string robot_file_path, const std::string init_file_path);
-  void    initializeDevice(const std::string init_file_path);
   void    process();
+
+  void    setCtrlModule(std::string module_name);
+  void    loadOffset(const std::string path);
 
   void    addMotionModule(MotionModule *module);
   void    removeMotionModule(MotionModule *module);
@@ -110,13 +120,6 @@ public:
   void    removeSensorModule(SensorModule *module);
   void    addRegulatorModule(RegulatorModule *module);
   void    removeRegulatorModule(RegulatorModule *module);
-
-  void    startTimer();
-  void    stopTimer();
-  bool    isTimerRunning();
-
-  void    setCtrlModule(std::string module_name);
-  void    loadOffset(const std::string path);
 
   void    writeControlTableCallback(const robotis_controller_msgs::msg::WriteControlTable::SharedPtr msg);
   void    syncWriteItemCallback(const robotis_controller_msgs::msg::SyncWriteItem::SharedPtr msg); // 直接写入,比如control_led
