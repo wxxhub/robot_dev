@@ -25,6 +25,8 @@
 #include "dynamixel_sdk/group_bulk_read.h"
 #include "dynamixel_sdk/group_sync_write.h"
 
+#define OPEN_REGULATOR_MODULES
+
 namespace robotis_framework
 {
 
