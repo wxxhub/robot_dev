@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>op3_base_module</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="614610440@qq.com">wxx</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>robotis_controller_msgs</depend>
+  <depend>robotis_framework_common</depend>
+  <depend>robotis_device</depend>
+  <depend>robotis_math</depend>
+  <depend>op3_kinematics_dynamics</depend>
+  <depend>Boost</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

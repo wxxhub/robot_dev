@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(robotis_controller)
+project(op3_direct_control_module)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -22,55 +22,38 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(robotis_controller_msgs REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
-find_package(robotis_device REQUIRED)
 find_package(robotis_framework_common REQUIRED)
+find_package(robotis_device REQUIRED)
+find_package(robotis_math REQUIRED)
+find_package(op3_kinematics_dynamics REQUIRED)
 find_package(Boost REQUIRED)
-find_package(PkgConfig REQUIRED)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
-find_path(YAML_CPP_INCLUDE_DIR
-  NAMES yaml_cpp.h
-  PATHS ${YAML_CPP_INCLUDE_DIRS}
-)
-find_library(YAML_CPP_LIBRARY
-  NAMES YAML_CPP
-  PATHS ${YAML_CPP_LIBRARY_DIRS}
-)
-link_directories(${YAML_CPP_LIBRARY_DIRS})
-
-if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
-add_definitions(-DHAVE_NEW_YAMLCPP)
-endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
-
-add_library(robotis_controller src/robotis_controller.cpp)
-target_include_directories(robotis_controller PUBLIC
+add_library(direct_control_module src/direct_control_module.cpp)
+target_include_directories(direct_control_module PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(
-  robotis_controller
+  direct_control_module
   "rclcpp"
   "std_msgs"
   "sensor_msgs"
   "robotis_controller_msgs"
-  "dynamixel_sdk"
-  "robotis_device"
   "robotis_framework_common"
-  "Boost"
-  "PkgConfig"
+  "robotis_device"
+  "robotis_math"
+  "op3_kinematics_dynamics"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
-target_compile_definitions(robotis_controller PRIVATE "ROBOTIS_CONTROLLER_BUILDING_LIBRARY")
+target_compile_definitions(direct_control_module PRIVATE "OP3_DIRECT_CONTROL_MODULE_BUILDING_LIBRARY")
 
 install(
   DIRECTORY include/
   DESTINATION include
 )
 install(
-  TARGETS robotis_controller
+  TARGETS direct_control_module
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -95,7 +78,7 @@ ament_export_interfaces(
   export_${PROJECT_NAME}
 )
 ament_export_libraries(
-  robotis_controller
+  direct_control_module
 )
 
 ament_package()
