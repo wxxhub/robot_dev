@@ -3,7 +3,9 @@
 
 #include "op3_action_module/visibility_control.h"
 
-namespace op3_action_module
+#include "robotis_framework_common/motion_module.h"
+
+namespace robotis_op
 {
 
 class ActionModule
@@ -14,6 +16,6 @@ public:
   virtual ~ActionModule();
 };
 
-}  // namespace op3_action_module
+}  // namespace robotis_op
 
 #endif  // OP3_ACTION_MODULE__ACTION_MODULE_HPP_

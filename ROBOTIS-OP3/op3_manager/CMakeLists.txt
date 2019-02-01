@@ -17,6 +17,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(robotis_controller_msgs REQUIRED)
 find_package(op3_action_module_msgs REQUIRED)
 find_package(op3_walking_module_msgs REQUIRED)
@@ -38,13 +39,42 @@ find_package(op3_direct_control_module REQUIRED)
 find_package(op3_online_walking_module REQUIRED)
 find_package(op3_tuning_module REQUIRED)
 find_package(Boost REQUIRED)
+if (NOT Boost_FOUND)
+  message("boost not found")
+endif()
+# Resolve system dependency on yaml-cpp, which apparently does not
+# provide a CMake find_package() module.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+find_path(YAML_CPP_INCLUDE_DIR
+  NAMES yaml_cpp.h
+  PATHS ${YAML_CPP_INCLUDE_DIRS}
+)
+find_library(YAML_CPP_LIBRARY
+  NAMES YAML_CPP
+  PATHS ${YAML_CPP_LIBRARY_DIRS}
+)
+link_directories(/usr/local/lib)  
 
+if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+add_definitions(-DHAVE_NEW_YAMLCPP)
+endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 add_executable(op3_manager src/op3_manager.cpp)
+target_link_libraries(${PROJECT_NAME}
+boost_system
+boost_thread
+${Boost_LIBRARIES}
+yaml-cpp
+${YAML_CPP_LIBRARIES}
+)
 target_include_directories(op3_manager PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+  ${Boost_INCLUDE_DIRS}
+  /usr/local/include/yaml-cpp)
 ament_target_dependencies(
   op3_manager
+  "rclcpp"
   "robotis_controller_msgs"
   "op3_action_module_msgs"
   "op3_walking_module_msgs"
@@ -67,9 +97,21 @@ ament_target_dependencies(
   "op3_tuning_module"
 )
 
+# Install binaries
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION bin
+)
+
+
 install(TARGETS op3_manager
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -1,6 +1,6 @@
-#include "op3_action_module/action_module.hpp"
+#include "op3_action_module/action_module.h"
 
-namespace op3_action_module
+namespace robotis_op
 {
 
 ActionModule::ActionModule()
@@ -11,4 +11,4 @@ ActionModule::~ActionModule()
 {
 }
 
-}  // namespace op3_action_module
+}  // namespace robotis_op

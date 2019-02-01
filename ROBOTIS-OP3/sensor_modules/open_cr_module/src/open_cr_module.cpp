@@ -1,6 +1,6 @@
-#include "open_cr_module/open_cr_module.hpp"
+#include "open_cr_module/open_cr_module.h"
 
-namespace open_cr_module
+namespace robotis_op
 {
 
 OpenCrModule::OpenCrModule()
@@ -11,4 +11,4 @@ OpenCrModule::~OpenCrModule()
 {
 }
 
-}  // namespace open_cr_module
+}  // namespace robotis_op

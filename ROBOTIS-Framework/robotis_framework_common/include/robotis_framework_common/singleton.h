@@ -11,6 +11,11 @@ private:
   static T *unique_instance_;
 
 protected:
+  Singleton() { }
+  Singleton(Singleton const&) { }
+  Singleton& operator=(Singleton const&) { return *this; }
+
+public:
   static T* getInstance()
   {
     if (unique_instance_ == NULL)
