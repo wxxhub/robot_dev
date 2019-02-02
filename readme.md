@@ -1,8 +1,11 @@
 ####
 
+#### 开发环境
+> Ubantu18, ROS2-crystal
+> ROS2不要使用bouncy版本，launch无法实现传参
+
 #### yaml-cpp
-> ```` git clone https://github.com/jbeder/yaml-cpp.git ````
-> [地址](https://github.com/jbeder/yaml-cpp)
+> ```` sudo apt-get install libyaml-cpp-dev ````
 
 
 #### regulator_module
