@@ -1,6 +1,6 @@
 
 /* Author: wxx */
-
+#include <iostream>
 /* ROS API Header */
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.h>
@@ -41,6 +41,26 @@ std::string g_device_name;
 // ros::Publisher g_init_pose_pub;
 // ros::Publisher g_demo_command_pub;
 
+void parseInitPoseData(const std::string &path)
+{
+  YAML::Node doc;
+  try
+  {
+    // load yaml
+    doc = YAML::LoadFile(path.c_str());
+  } catch (const std::exception& e)
+  {
+    printf("Fail to load yaml file.");
+    return;
+  }
+
+  // parse movement time
+  int mov_time;
+  mov_time = doc["test"].as<double>();
+  std::cout<<"test: "<<mov_time<<std::endl;
+
+}
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
@@ -52,9 +72,11 @@ int main(int argc, char ** argv)
   RobotisController *controller = RobotisController::getInstance();
 
   manager_node->get_parameter("offset_file_path", g_offset_file);
-  printf("offset_file_path:%s\n", g_offset_file);
+  std::cout<<"offset_file_path: "<<g_offset_file<<std::endl;
+  parseInitPoseData(g_offset_file);
+  // printf("offset_file_path:%d\n", g_offset_file);
 
-  printf("finish\n");
+  printf("finished\n");
   rclcpp::shutdown();
   return 0;
 }
