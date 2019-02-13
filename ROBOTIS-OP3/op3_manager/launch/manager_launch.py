@@ -13,7 +13,7 @@ def generate_launch_description():
         # Realsense
         launch_ros.actions.Node(
             package='op3_manager', node_executable='op3_manager',node_name='op3_manager',
-            output='screen', parameters=[{'offset_file_path':offset_file_path}]),
+            output='screen', parameters=[{'offset_file_path':offset_file_path},{'device_name':'/dev/ttyUSB0'}]),
     ])
 
 

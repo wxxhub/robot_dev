@@ -3,12 +3,25 @@
 namespace robotis_op
 {
 
-OpenCrModule::OpenCrModule()
+OpenCRModule::OpenCRModule()
+    : DEBUG_PRINT(false)
 {
 }
 
-OpenCrModule::~OpenCrModule()
+OpenCRModule::~OpenCRModule()
 {
+}
+
+void OpenCRModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
+{
+
+}
+
+void OpenCRModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
+               std::map<std::string, robotis_framework::Sensor *> sensors)
+
+{
+    
 }
 
 }  // namespace robotis_op
