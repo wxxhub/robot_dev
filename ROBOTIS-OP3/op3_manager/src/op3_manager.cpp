@@ -13,6 +13,7 @@
 
 // /* Motion Module Header */
 #include "op3_action_module/action_module.h"
+#include "op3_base_module/base_module.h"
 
 // /* Regulator Module Header */
 #include "hand_regulator_module/hand_regulator_module.h"
@@ -70,6 +71,10 @@ void parseInitPoseData(const std::string &path)
 
 int main(int argc, char ** argv)
 {
+  char   buffer[80];
+	getcwd(buffer, 80);
+	std::cout << "manager run path: " << buffer << std::endl;
+
   rclcpp::init(argc, argv);
   auto manager_node = rclcpp::Node::make_shared("op3_manager");
 
@@ -86,10 +91,11 @@ int main(int argc, char ** argv)
   manager_node->get_parameter_or("gazebo", controller->gazebo_mode_, false);
   std::cout<<"g_device_name: "<<g_device_name<<std::endl;
   // parseInitPoseData(g_offset_file);
-  // printf("offset_file_path:%d\n", g_offset_file);
+  // printf("g_device_name:%s\n", g_device_name);
 
   g_is_simulation = controller->gazebo_mode_;
 
+/*
   if (g_is_simulation == false)
   {
     PortHandler *port_handler;
@@ -176,7 +182,7 @@ int main(int argc, char ** argv)
     if (robot_name != NONE_STRING)
       controller->gazebo_robot_name_ = robot_name;
   }
-
+ 
   if (g_robot_file == "")
   {
     RCLCPP_ERROR(manager_node->get_logger(), "NO robot file path in the ROS parameters.");
@@ -184,6 +190,7 @@ int main(int argc, char ** argv)
   }
 
   // initialize robot
+  RCLCPP_INFO(manager_node->get_logger(), "initialize robot");
   if (controller->initialize(g_robot_file, g_init_file) == false)
   {
     RCLCPP_ERROR(manager_node->get_logger(), "ROBOTIS Controller Initialize Fail!");
@@ -191,28 +198,30 @@ int main(int argc, char ** argv)
   }
 
   // load offset
+  RCLCPP_INFO(manager_node->get_logger(), "load offset");
   if (g_offset_file != "")
     controller->loadOffset(g_offset_file);
-
   usleep(300 * 1000);
-  
+    */
+ RCLCPP_INFO(manager_node->get_logger(), "start add module");
   /* Add Sensor Module */
-  controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
+  // controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
 
   /* Add Motion Module */
   // controller->addMotionModule((MotionModule*) ActionModule::getInstance());
-  // controller->addMotionModule((MotionModule*) BaseModule::getInstance());
+  controller->addMotionModule((MotionModule*) BaseModule::getInstance());
   // controller->addMotionModule((MotionModule*) HeadControlModule::getInstance());
   // controller->addMotionModule((MotionModule*) WalkingModule::getInstance());
   // controller->addMotionModule((MotionModule*) DirectControlModule::getInstance());
 
   /* Add Regulator Module */
-  controller->addRegulatorModule((RegulatorModule*) HandRegulatorModule::getInstance());
+  // controller->addRegulatorModule((RegulatorModule*) HandRegulatorModule::getInstance());
 
+  RCLCPP_INFO(manager_node->get_logger(), "finished add module");
   // start timer
-  controller->startTimer();
+  // controller->startTimer();
 
-  usleep(100 * 1000);
+  usleep(10000 * 1000);
 
   // go to init pose
   std_msgs::msg::String init_msg;

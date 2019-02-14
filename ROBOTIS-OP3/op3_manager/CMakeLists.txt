@@ -38,6 +38,7 @@ find_package(op3_action_module REQUIRED)
 find_package(op3_direct_control_module REQUIRED)
 find_package(op3_online_walking_module REQUIRED)
 find_package(op3_tuning_module REQUIRED)
+find_package(hand_regulator_module REQUIRED)
 find_package(Boost REQUIRED)
 if (NOT Boost_FOUND)
   message("boost not found")
@@ -95,6 +96,7 @@ ament_target_dependencies(
   "op3_direct_control_module"
   "op3_online_walking_module"
   "op3_tuning_module"
+  "hand_regulator_module"
 )
 
 # Install binaries

@@ -28,7 +28,8 @@ find_package(robotis_math REQUIRED)
 find_package(op3_kinematics_dynamics REQUIRED)
 find_package(Boost REQUIRED)
 
-add_library(base_module src/base_module.cpp)
+add_library(base_module src/base_module.cpp
+                        src/base_module_state.cpp)
 target_include_directories(base_module PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)

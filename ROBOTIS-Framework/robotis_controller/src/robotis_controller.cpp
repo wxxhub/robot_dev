@@ -1,4 +1,5 @@
 #include "robotis_controller/robotis_controller.h"
+#include <iostream>
 
 using namespace robotis_framework;
 
@@ -15,15 +16,17 @@ RobotisController::RobotisController()
       gazebo_robot_name_("robotis")
 {
     direct_sync_write_.clear();
+    robot_node_ = rclcpp::Node::make_shared("robotis_controller");
 }
 
 bool RobotisController::initialize(const std::string robot_file_path, const std::string init_file_path)
 {
 //   std::string dev_desc_dir_path = ros::package::getPath("robotis_device") + "/devices";
+  RCLCPP_INFO(robot_node_->get_logger(), "robot init");
   std::string dev_desc_dir_path;
-  robot_node_->get_parameter("robotis_device", dev_desc_dir_path);
+  dev_desc_dir_path = "/home/wxx/robot_dev/src/ROBOTIS-Framework/robotis_device";
   dev_desc_dir_path = dev_desc_dir_path + "/devices";
-
+  std::cout<<"dev_desc_dir_path: "<<dev_desc_dir_path<<std::endl;
   // load robot info : port , device
   robot_ = new Robot(robot_file_path, dev_desc_dir_path);
 
@@ -1959,8 +1962,9 @@ void RobotisController::addMotionModule(MotionModule *module)
       return;
     }
   }
-
-  module->initialize(robot_->getControlCycle(), robot_);
+  // module->initialize(robot_->getControlCycle(), robot_);
+  module->initialize(8, robot_);
+  // std::cout << "add module4" << std::endl;
   motion_modules_.push_back(module);
   motion_modules_.unique();
 }
