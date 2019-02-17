@@ -4,23 +4,56 @@
 #include "cv_tools/cv_tools.hpp"
 
 #define IMAGE_DEBUG
+using std::placeholders::_1;
 using namespace cv;
-
-namespace detector_module
-{
+using namespace detector_module;
 
 RoadDetector::RoadDetector()
+    : new_image_(false),
+      Node("road_detector")
 {
+    // detector_node_ = rclcpp::Node::make_shared("road_detector");
+    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
+    // test_sub_ = this->create_subscription<sensor_msgs::msg::Image>("wxx_topic", std::bind(&RoadDetector::testCallback, this, std::placeholders::_1));
+
+    // test_pub_ = this->create_publisher<std_msgs::msg::String>("topic");
 }
 
 RoadDetector::~RoadDetector()
 {
+    
+}
+
+void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
+{
+    printf("new image test\n");
+    Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
+              const_cast<unsigned char *>(msg->data.data()), msg->step);
+    
+    input_image_ = frame.clone();
+    new_image_ = true;
+}
+
+void RoadDetector::testCallback(const std_msgs::msg::String::SharedPtr msg)
+{
+    printf("test message\n");
+}
+
+void RoadDetector::process()
+{
+    detector(input_image_);
+    imshow("road_detector", input_image_);
+    showResult(input_image_);
+    cvWaitKey(1);
 }
 
 void RoadDetector::process(Mat image)
 {
     detector(image);
     imshow("road_detector",image);
+    auto message = std::make_shared<std_msgs::msg::String>();
+    message->data = "test";
+    test_pub_->publish(message);
     cvWaitKey(1);
 }
 
@@ -76,15 +109,15 @@ int RoadDetector::detector(Mat image)
     bool get_road_result = getRoad(image, road_lab, up_point, down_point);
     if  (get_road_result)
     {
-       result.bRoad = true;
-		result.up_point = up_point;
-		result.down_point = down_point; 
+       result_.bRoad = true;
+		result_.up_point = up_point;
+		result_.down_point = down_point; 
     }
     else
     {
-        result.bRoad = false;
-		result.up_point = Point2f(0,0);
-		result.down_point = Point2f(0,0);
+        result_.bRoad = false;
+		result_.up_point = Point2f(0,0);
+		result_.down_point = Point2f(0,0);
     }
     
 }
@@ -145,13 +178,13 @@ bool RoadDetector::getRoad(Mat image, Mat road_lab, Point2f &up_point,Point2f &d
 					max_down=vp[j];
 				}
             }
-            road_rect = rrect;
+            road_rect_ = rrect;
             max_rect_area = area;
         }
     }
 
-    float heighe_width = road_rect.size.height / road_rect.size.width;
-    float angle = cv_tools::getRectDegree(road_rect, up_point, down_point);
+    float heighe_width = road_rect_.size.height / road_rect_.size.width;
+    float angle = cv_tools::getRectDegree(road_rect_, up_point, down_point);
 
 /*  暂时没有效果
 	Rect rr1 = rect.boundingRect();
@@ -196,14 +229,49 @@ void RoadDetector::showResult(cv::Mat image)
 {
     Mat show_img = image.clone();
     Point2f vertices[4];  
-	road_rect.points(vertices);  
+	road_rect_.points(vertices);  
 	for (int i = 0; i < 4; i++)  
 		line(show_img, vertices[i], vertices[(i+1)%4], Scalar(255,255,0)); 
 
-    line(show_img, result.up_point, result.down_point, Scalar(0,255,0),5);
-    circle(show_img, result.up_point,13,Scalar(255,0,0),3);
-	circle(show_img, result.down_point,13,Scalar(0,0,255),3);
+    line(show_img, result_.up_point, result_.down_point, Scalar(0,255,0),5);
+    circle(show_img, result_.up_point,13,Scalar(255,0,0),3);
+	circle(show_img, result_.down_point,13,Scalar(0,0,255),3);
     imshow("show_img", show_img);
 }
 
-}  // namespace detector_module
+bool RoadDetector::newImage()
+{
+    if (new_image_)
+    {
+        new_image_ = false;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
+    return new_image_;
+}
+
+int RoadDetector::encodingToMatType(const std::string & encoding)
+{
+  if (encoding == "mono8") {
+    return CV_8UC1;
+  } else if (encoding == "bgr8") {
+    return CV_8UC3;
+  } else if (encoding == "mono16") {
+    return CV_16SC1;
+  } else if (encoding == "rgba8") {
+    return CV_8UC4;
+  } else if (encoding == "bgra8") {
+    return CV_8UC4;
+  } else if (encoding == "32FC1") {
+    return CV_32FC1;
+  } else if (encoding == "rgb8") {
+    return CV_8UC3;
+  } else {
+    throw std::runtime_error("Unsupported encoding type");
+  }
+}
+

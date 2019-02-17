@@ -58,6 +58,11 @@ install(
 )
 
 add_executable(road_detector_node src/road_detector_node.cpp)
+target_link_libraries(${PROJECT_NAME}
+boost_system
+boost_thread
+${Boost_LIBRARIES}
+)
 target_include_directories(road_detector_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -66,6 +71,22 @@ target_link_libraries(road_detector_node road_detector)
 install(TARGETS road_detector_node
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
+
+add_executable(road_detector_form_usb src/road_detector_form_usb.cpp)
+target_include_directories(road_detector_form_usb PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_link_libraries(road_detector_form_usb road_detector)
+
+install(TARGETS road_detector_form_usb
+  EXPORT export_${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME})
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

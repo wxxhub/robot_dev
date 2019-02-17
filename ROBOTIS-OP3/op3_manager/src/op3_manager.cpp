@@ -63,9 +63,9 @@ void parseInitPoseData(const std::string &path)
   }
 
   // parse movement time
-  int mov_time;
-  mov_time = doc[NONE_STRING].as<double>();
-  std::cout<<"test: "<<mov_time<<std::endl;
+  // int mov_time;
+  // mov_time = doc[NONE_STRING].as<double>();
+  // std::cout<<"test: "<<mov_time<<std::endl;
 
 }
 

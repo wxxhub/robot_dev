@@ -6,6 +6,8 @@ using namespace cv;
 
 int main(int argc, char ** argv)
 {
+  rclcpp::init(argc, argv);
+
   VideoCapture cap(0);
 
   if(!cap.isOpened())
@@ -17,7 +19,7 @@ int main(int argc, char ** argv)
   Mat image;
   detector_module::RoadDetector road_detector;
 
-  while(true)
+  while(rclcpp::ok())
   {
     cap>>image;
     road_detector.process(image);

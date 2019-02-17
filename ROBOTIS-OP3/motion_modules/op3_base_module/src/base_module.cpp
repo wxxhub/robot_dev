@@ -6,7 +6,6 @@
 
 const std::string NONE_STRING = "";
 const std::string INIT_PATH = "/data/ini_pose.yaml";
-using std::placeholders::_1;
 
 namespace robotis_op
 {

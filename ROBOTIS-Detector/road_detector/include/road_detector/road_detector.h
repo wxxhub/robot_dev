@@ -1,8 +1,13 @@
 #ifndef ROAD_DETECTOR__ROAD_DETECTOR_HPP_
 #define ROAD_DETECTOR__ROAD_DETECTOR_HPP_
 #include <opencv2/highgui.hpp>
+#include <boost/thread.hpp>
 
+#include "rclcpp/rclcpp.hpp"
 #include "road_detector/visibility_control.h"
+
+#include "sensor_msgs/msg/image.hpp"
+#include "std_msgs/msg/string.hpp"
 
 namespace detector_module
 {
@@ -39,22 +44,40 @@ public:
 
 const enum Color road_color = RED;
 
-class RoadDetector
+class RoadDetector : public rclcpp::Node
 {
 public:
   RoadDetector();
 
   virtual ~RoadDetector();
 
+  // cv 
   void process(cv::Mat image);
+  void process();
   int detector(cv::Mat image);
   bool getRoad(cv::Mat image, cv::Mat road_lab, cv::Point2f &up_point, cv::Point2f &down_point);
   void showResult(cv::Mat image);
+  bool newImage();
+  int encodingToMatType(const std::string & encoding);
 
 private:
-  ResultInfo result;
+  ResultInfo result_;
+  cv::RotatedRect road_rect_;
+  cv::Mat input_image_;
 
-  cv::RotatedRect road_rect;
+  rclcpp::Node::SharedPtr detector_node_;
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr test_sub_;
+
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr test_pub_;
+
+  boost::thread queue_thread_;
+  
+  bool new_image_;
+
+  // ros2
+  void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
+  void testCallback(const std_msgs::msg::String::SharedPtr msg);
 
 };
 
