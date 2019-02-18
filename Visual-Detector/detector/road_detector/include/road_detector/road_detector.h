@@ -9,7 +9,7 @@
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "road_detector_msgs/msg/road_detector.hpp"
+#include "road_detector_msgs/msg/road_result.hpp"
 
 namespace detector_module
 {
@@ -20,7 +20,8 @@ enum Color
   GREEN,
   YELLOW,
   BLUE,
-  WHITE
+  WHITE,
+  BLACK
 };
 
 enum Direction
@@ -35,8 +36,8 @@ class ResultInfo
 public:
 	bool road_exist;
   bool mark_exist;
-	cv::Point2f up_point,down_point;
-	cv::Mat imgmark,imgangle;
+	cv::Point2f up_point, down_point;
+	cv::Mat imgmark, imgangle;
 	Direction direction;
 	ResultInfo()
 	{	
@@ -62,9 +63,10 @@ public:
   void process(cv::Mat image);
   void process();
   int detector(cv::Mat image);
-  bool getRoad(cv::Mat image, cv::Mat road_lab, cv::Point2f &up_point, cv::Point2f &down_point);
-  void showResult(cv::Mat image);
+  bool getRoad(cv::Mat road_lab, cv::Point2f &up_point, cv::Point2f &down_point, float &road_angle);
+  bool getMarkImage(cv::Mat mark_image, float &road_angle);
   bool newImage();
+  void showResult(cv::Mat image);
   int encodingToMatType(const std::string & encoding);
 
 private:
@@ -75,11 +77,20 @@ private:
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
 
-  rclcpp::Publisher<road_detector_msgs::msg::RoadDetector>::SharedPtr result_pub_;
+  rclcpp::Publisher<road_detector_msgs::msg::RoadResult>::SharedPtr result_pub_;
 
   boost::thread queue_thread_;
   
   bool new_image_;
+  bool show_result_;
+  bool mark_detector_;
+  const Color mark_background_;
+
+  int mark_rect_width;
+  int half_mark_rect_width;
+
+  int image_width;
+  int image_heidht;
 
   // ros2
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);

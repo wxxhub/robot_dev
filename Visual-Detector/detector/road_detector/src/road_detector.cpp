@@ -8,11 +8,16 @@ using namespace detector_module;
 
 RoadDetector::RoadDetector()
     : new_image_(false),
-      Node("road_detector")
+      Node("road_detector"),
+      show_result_(true),
+      mark_detector_(true),
+      mark_background_(WHITE),
+      mark_rect_width(120),
+      half_mark_rect_width(mark_rect_width/2)
 {
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
 
-    result_pub_ = this->create_publisher<road_detector_msgs::msg::RoadDetector>("/road_detector/result");
+    result_pub_ = this->create_publisher<road_detector_msgs::msg::RoadResult>("/road_detector/result");
 }
 
 RoadDetector::~RoadDetector()
@@ -22,10 +27,18 @@ RoadDetector::~RoadDetector()
 
 void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
+    static bool first_image = true;
     printf("new image test\n");
     Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
               const_cast<unsigned char *>(msg->data.data()), msg->step);
     
+    if (first_image)
+    {
+        image_width = msg->width;
+        image_heidht = msg->height;
+        first_image = false;
+    }
+
     input_image_ = frame.clone();
     new_image_ = true;
 }
@@ -33,6 +46,7 @@ void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 void RoadDetector::process()
 {
     detector(input_image_);
+    publishResult();
     imshow("road_detector", input_image_);
     showResult(input_image_);
     cvWaitKey(1);
@@ -40,8 +54,17 @@ void RoadDetector::process()
 
 void RoadDetector::process(Mat image)
 {
-    detector(image);
-    imshow("road_detector",image);
+    static bool first_image = true;
+    if (first_image)
+    {
+        image_width = image.cols;
+        image_heidht = image.rows;
+        first_image = false;
+    }
+    input_image_ = image.clone();
+    detector(input_image_);
+    publishResult();
+    imshow("road_detector", input_image_);
     cvWaitKey(1);
 }
 
@@ -49,7 +72,7 @@ int RoadDetector::detector(Mat image)
 {
     Mat lab;
     std::vector<Mat> mv;
-    Mat road_lab;
+    Mat road_lab, mark_lab;
     Point2f up_point,down_point;
     cvtColor(image, lab, COLOR_BGR2Lab);
     imshow("road_detector lab", lab);
@@ -62,8 +85,6 @@ int RoadDetector::detector(Mat image)
 	// imshow("mv[2]", mv[2]);
 #endif /* IMAGE_DEBUG */
 
-//     printf ("RED: %d\n", RED);
-//     printf ("GREEN: %d\n", GREEN);
     switch (road_color)
     {
         case RED:
@@ -90,14 +111,18 @@ int RoadDetector::detector(Mat image)
             break;
     }
 
+    // mark_test
+    mark_lab = 255-mv[2];
+
 #ifdef IMAGE_DEBUG
     imshow("road_lab", road_lab);
 #endif /* IMAGE_DEBUG */
 
-    bool get_road_result = getRoad(image, road_lab, up_point, down_point);
+    float road_angle = 0;
+    bool get_road_result = getRoad(road_lab, up_point, down_point, road_angle);
     if  (get_road_result)
     {
-       result_.road_exist = true;
+        result_.road_exist = true;
 		result_.up_point = up_point;
 		result_.down_point = down_point; 
     }
@@ -107,16 +132,24 @@ int RoadDetector::detector(Mat image)
 		result_.up_point = Point2f(0,0);
 		result_.down_point = Point2f(0,0);
     }
+
+    if (!mark_detector_)
+        return 1;
+    
+    Mat mark_image;
+
+    if (!getMarkImage(mark_image, road_angle))
+        return 2;
     
 }
 
-bool RoadDetector::getRoad(Mat image, Mat road_lab, Point2f &up_point,Point2f &down_point)
+bool RoadDetector::getRoad(Mat road_lab, Point2f &up_point, Point2f &down_point, float &road_angle)
 {
     Mat road_binary;
     threshold(road_lab, road_binary, 0, 255.0, CV_THRESH_BINARY | THRESH_OTSU);
 
 #ifdef IMAGE_DEBUG
-    imshow("road_binary", road_binary);
+    // imshow("road_binary", road_binary);
 #endif /* IMAGE_DEBUG */
 
     //膨胀处理
@@ -125,10 +158,6 @@ bool RoadDetector::getRoad(Mat image, Mat road_lab, Point2f &up_point,Point2f &d
     //腐蚀处理
     erode(road_binary, road_binary, Mat());     
     erode(road_binary, road_binary, Mat());
-
-#ifdef IMAGE_DEBUG
-    imshow("after_road_binary", road_binary);
-#endif /* IMAGE_DEBUG */
 
     std::vector<std::vector<Point> > contours;
     findContours(road_binary, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -172,7 +201,7 @@ bool RoadDetector::getRoad(Mat image, Mat road_lab, Point2f &up_point,Point2f &d
     }
 
     float heighe_width = road_rect_.size.height / road_rect_.size.width;
-    float angle = cv_tools::getRectDegree(road_rect_, up_point, down_point);
+    road_angle = cv_tools::getRectDegree(road_rect_, up_point, down_point);
 
 /*  暂时没有效果
 	Rect rr1 = rect.boundingRect();
@@ -207,24 +236,79 @@ bool RoadDetector::getRoad(Mat image, Mat road_lab, Point2f &up_point,Point2f &d
     imshow("after_road_binary", road_binary);
 #endif /* IMAGE_DEBUG */
 
-    if (max_rect_area > 0.6 * image.cols * image.rows)
+    if (max_rect_area > 0.6 * road_lab.cols * road_lab.rows)
         return false;
 
     return true;
 }
 
+bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
+{
+    //  如果不存在路
+    if (!mark_detector_ || !result_.road_exist)
+        return false;
+
+    // 是否到路线端头
+    if (result_.up_point.x < image_width * 0.1 || 
+        result_.up_point.x > image_width * 0.9 ||
+        result_.up_point.y < image_heidht * 0.3)
+    {
+        return false;
+    }
+
+    // 路标区域超出图片范围
+    if (result_.up_point.x - half_mark_rect_width <= 0 || result_.up_point.x + half_mark_rect_width >= image_width)
+    {
+        return false;
+    }
+
+    Mat rotated_image, rotated_mat;
+
+    // 计算路标需要旋转的角度
+    road_angle -= 90;
+    road_angle = -road_angle;
+    //获取旋转矩阵
+    rotated_mat = getRotationMatrix2D(Point(result_.up_point.x, result_.up_point.y), road_angle, 1.0);
+
+    /// 旋转已扭曲图像
+    warpAffine(input_image_, rotated_image, rotated_mat, input_image_.size(), INTER_CUBIC, 1);
+
+    //路线上部的一片区域
+    //---- mark_rect_width
+
+    //    ----
+    //    |   |     mark_rect   标记所在区域 ; * result.up_point 
+    //    --*--
+    //      |
+    //      |
+    //      @       @ result.down_point 
+
+    Rect mark_rect = Rect(result_.up_point.x - half_mark_rect_width, result_.up_point.y - mark_rect_width, mark_rect_width, mark_rect_width);
+    mark_rect &= Rect(0, 0, rotated_image.cols, rotated_image.rows);
+    rotated_image(mark_rect).copyTo(mark_image);
+
+#ifdef IMAGE_DEBUG
+    // imshow("rotated_image", rotated_image);
+    imshow("mark_image", mark_image);
+#endif /* IMAGE_DEBUG */
+    return true;
+}
+
 void RoadDetector::showResult(cv::Mat image)
 {
-    Mat show_img = image.clone();
-    Point2f vertices[4];  
-	road_rect_.points(vertices);  
-	for (int i = 0; i < 4; i++)  
-		line(show_img, vertices[i], vertices[(i+1)%4], Scalar(255,255,0)); 
+    if (show_result_)
+    {
+        Mat show_img = image.clone();
+        Point2f vertices[4];  
+        road_rect_.points(vertices);  
+        for (int i = 0; i < 4; i++)  
+            line(show_img, vertices[i], vertices[(i+1)%4], Scalar(255,255,0)); 
 
-    line(show_img, result_.up_point, result_.down_point, Scalar(0,255,0),5);
-    circle(show_img, result_.up_point,13,Scalar(255,0,0),3);
-	circle(show_img, result_.down_point,13,Scalar(0,0,255),3);
-    imshow("show_img", show_img);
+        line(show_img, result_.up_point, result_.down_point, Scalar(0,255,0),5);
+        circle(show_img, result_.up_point,13,Scalar(255,0,0),3);
+        circle(show_img, result_.down_point,13,Scalar(0,0,255),3);
+        imshow("show_img", show_img);
+    }
 }
 
 bool RoadDetector::newImage()
@@ -244,15 +328,15 @@ bool RoadDetector::newImage()
 
 void RoadDetector::publishResult()
 {
-    auto message = road_detector_msgs::msg::RoadDetector();
+    auto message = road_detector_msgs::msg::RoadResult();
     message.road_exist = result_.road_exist;
     message.mark_exist = result_.mark_exist;
     message.up_x = result_.up_point.x;
     message.up_y = result_.up_point.y;
     message.down_x = result_.down_point.x;
     message.down_y = result_.down_point.y;
-    message.image_width = input_image_.cols;
-    message.image_height = input_image_.rows;
+    message.image_width = image_width;
+    message.image_height = image_heidht;
     result_pub_->publish(message);
 }
 

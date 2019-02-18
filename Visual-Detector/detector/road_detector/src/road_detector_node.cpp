@@ -22,9 +22,9 @@ int main(int argc, char ** argv)
   while(rclcpp::ok())
   {
     cap>>image;
+    // printf("cols: %d", image.cols);
     road_detector.process(image);
     road_detector.showResult(image);
-    // printf("cols: %d", image.cols);
   }
   
   return 0;
