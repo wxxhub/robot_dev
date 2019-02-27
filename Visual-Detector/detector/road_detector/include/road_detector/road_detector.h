@@ -44,8 +44,6 @@ public:
 	}
 };
 
-const enum Color road_color = RED;
-
 class RoadDetector : public rclcpp::Node
 {
 public:
@@ -78,6 +76,7 @@ private:
   bool new_image_;
   bool show_result_;
   bool mark_detector_;
+  const Color road_color;
   const bool wite_background_;
 
   int mark_rect_width;

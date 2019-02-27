@@ -9,6 +9,7 @@ using namespace detector_module;
 RoadDetector::RoadDetector()
     : new_image_(false),
       Node("road_detector"),
+      road_color(RED),
       show_result_(true),
       mark_detector_(true),
       wite_background_(true),
@@ -147,7 +148,7 @@ int RoadDetector::detector(Mat image)
         result_.direction = direction_result;
     else
         result_.direction = DIRECT;
-        
+
 /* arrow test code
     Mat mark_image = input_image_.clone();
     ArrowDirection direction_result = arrow_detector_.getDirection(mark_image, wite_background_);
