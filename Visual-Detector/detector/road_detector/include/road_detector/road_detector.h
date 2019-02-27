@@ -6,6 +6,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "road_detector/visibility_control.h"
+#include "road_detector/arrow_detector.h"
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -24,21 +25,14 @@ enum Color
   BLACK
 };
 
-enum Direction
-{
-  LEFT = -1,
-  DIRECT = 0,
-  RIGHT = 1,
-};
-
 class ResultInfo
 {
 public:
 	bool road_exist;
   bool mark_exist;
 	cv::Point2f up_point, down_point;
-	cv::Mat imgmark, imgangle;
-	Direction direction;
+	cv::Mat mark_image, angle_image;
+	ArrowDirection direction;
 	ResultInfo()
 	{	
 		road_exist = false;
@@ -84,13 +78,15 @@ private:
   bool new_image_;
   bool show_result_;
   bool mark_detector_;
-  const Color mark_background_;
+  const bool wite_background_;
 
   int mark_rect_width;
   int half_mark_rect_width;
 
   int image_width;
   int image_heidht;
+
+  ArrowDetector arrow_detector_;
 
   // ros2
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);

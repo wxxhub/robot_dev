@@ -27,7 +27,8 @@ find_package(cv_tools REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(road_detector_msgs REQUIRED)
 
-add_library(road_detector src/road_detector.cpp)
+add_library(road_detector src/road_detector.cpp
+                          src/arrow_detector.cpp)
 target_include_directories(road_detector PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)

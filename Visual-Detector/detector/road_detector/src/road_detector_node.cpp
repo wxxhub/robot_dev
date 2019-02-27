@@ -9,6 +9,7 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
 
   VideoCapture cap(0);
+  rclcpp::WallRate loop_rate(30);
 
   if(!cap.isOpened())
 	{
@@ -17,14 +18,15 @@ int main(int argc, char ** argv)
 	}
   
   Mat image;
-  detector_module::RoadDetector road_detector;
+  auto road_detector = std::make_shared<detector_module::RoadDetector>();
 
   while(rclcpp::ok())
   {
     cap>>image;
-    // printf("cols: %d", image.cols);
-    road_detector.process(image);
-    road_detector.showResult(image);
+    rclcpp::spin_some(road_detector);
+    road_detector->process(image);
+    // road_detector->showResult(image);
+    loop_rate.sleep();
   }
   
   return 0;

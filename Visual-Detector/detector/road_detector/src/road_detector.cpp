@@ -1,7 +1,7 @@
 #include "road_detector/road_detector.h"
 #include "cv_tools/cv_tools.hpp"
 
-#define IMAGE_DEBUG
+// #define IMAGE_DEBUG
 using std::placeholders::_1;
 using namespace cv;
 using namespace detector_module;
@@ -11,7 +11,7 @@ RoadDetector::RoadDetector()
       Node("road_detector"),
       show_result_(true),
       mark_detector_(true),
-      mark_background_(WHITE),
+      wite_background_(true),
       mark_rect_width(120),
       half_mark_rect_width(mark_rect_width/2)
 {
@@ -28,7 +28,7 @@ RoadDetector::~RoadDetector()
 void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
     static bool first_image = true;
-    printf("new image test\n");
+    // printf("new image test\n");
     Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
               const_cast<unsigned char *>(msg->data.data()), msg->step);
     
@@ -141,6 +141,21 @@ int RoadDetector::detector(Mat image)
     if (!getMarkImage(mark_image, road_angle))
         return 2;
     
+    result_.mark_image = mark_image.clone();
+    ArrowDirection direction_result = arrow_detector_.getDirection(mark_image, wite_background_);
+    if (direction_result != ERROR)
+        result_.direction = direction_result;
+    else
+        result_.direction = DIRECT;
+        
+/* arrow test code
+    Mat mark_image = input_image_.clone();
+    ArrowDirection direction_result = arrow_detector_.getDirection(mark_image, wite_background_);
+    if (direction_result != ERROR)
+        result_.direction = direction_result;
+    else
+        result_.direction = DIRECT;
+*/ 
 }
 
 bool RoadDetector::getRoad(Mat road_lab, Point2f &up_point, Point2f &down_point, float &road_angle)
@@ -291,6 +306,7 @@ bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
     // imshow("rotated_image", rotated_image);
     imshow("mark_image", mark_image);
 #endif /* IMAGE_DEBUG */
+    result_.angle_image = rotated_mat.clone();
     return true;
 }
 
@@ -335,6 +351,7 @@ void RoadDetector::publishResult()
     message.up_y = result_.up_point.y;
     message.down_x = result_.down_point.x;
     message.down_y = result_.down_point.y;
+    message.direction = result_.direction;
     message.image_width = image_width;
     message.image_height = image_heidht;
     result_pub_->publish(message);

@@ -15,5 +15,5 @@ BallDetector::~BallDetector()
 
 void BallDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
-    printf("new image\n");
+    // printf("new image\n");
 }
