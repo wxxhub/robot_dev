@@ -27,7 +27,7 @@ bool RobotisController::initialize(const std::string robot_file_path, const std:
   std::string dev_desc_dir_path;
   dev_desc_dir_path = "/home/wxx/robot_dev/src/ROBOTIS-Framework/robotis_device";
   dev_desc_dir_path = dev_desc_dir_path + "/devices";
-  std::cout<<"dev_desc_dir_path: "<<dev_desc_dir_path<<std::endl;
+
   // load robot info : port , device
   robot_ = new Robot(robot_file_path, dev_desc_dir_path);
 

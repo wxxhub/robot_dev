@@ -180,7 +180,7 @@ int main(int argc, char ** argv)
     RCLCPP_ERROR(manager_node->get_logger(), "NO robot file path in the ROS parameters.");
     return -1;
   }
-
+ */
   // initialize robot
   RCLCPP_INFO(manager_node->get_logger(), "initialize robot");
   if (controller->initialize(g_robot_file, g_init_file) == false)
@@ -190,13 +190,13 @@ int main(int argc, char ** argv)
   }
 
   // load offset
-  RCLCPP_INFO(manager_node->get_logger(), "load offset");
-  if (g_offset_file != "")
-    controller->loadOffset(g_offset_file);
-  usleep(300 * 1000);
+//   RCLCPP_INFO(manager_node->get_logger(), "load offset");
+//   if (g_offset_file != "")
+//     controller->loadOffset(g_offset_file);
+//   usleep(300 * 1000);
   
- RCLCPP_INFO(manager_node->get_logger(), "start add module");
- */
+//  RCLCPP_INFO(manager_node->get_logger(), "start add module");
+
   /* Add Sensor Module */
   // controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
 
@@ -212,7 +212,7 @@ int main(int argc, char ** argv)
 
   RCLCPP_INFO(manager_node->get_logger(), "finished add module");
 
-  controller->startTimer();
+  // controller->startTimer();
 
   usleep(100 * 1000);
 

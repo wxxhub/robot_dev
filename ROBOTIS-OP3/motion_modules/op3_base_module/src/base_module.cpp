@@ -67,6 +67,7 @@ void BaseModule::queueThread()
 	rclcpp::WallRate loop_rate(control_cycle_msec_);
 	while (rclcpp::ok())
 	{
+    rclcpp::spin_some(module_node_);
 		loop_rate.sleep();
 	}
 }
