@@ -174,7 +174,7 @@ int main(int argc, char ** argv)
     if (robot_name != NONE_STRING)
       controller->gazebo_robot_name_ = robot_name;
   }
-  */
+
   if (g_robot_file == "")
   {
     RCLCPP_ERROR(manager_node->get_logger(), "NO robot file path in the ROS parameters.");
@@ -196,6 +196,7 @@ int main(int argc, char ** argv)
   usleep(300 * 1000);
   
  RCLCPP_INFO(manager_node->get_logger(), "start add module");
+ */
   /* Add Sensor Module */
   // controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
 
@@ -210,13 +211,8 @@ int main(int argc, char ** argv)
   // controller->addRegulatorModule((RegulatorModule*) HandRegulatorModule::getInstance());
 
   RCLCPP_INFO(manager_node->get_logger(), "finished add module");
-  // start timer
-  // try{
-  //   controller->startTimer();
-  // }catch(const std::exception& e)
-  // {
-  //   printf("controller start failed\n");
-  // }
+
+  controller->startTimer();
 
   usleep(100 * 1000);
 

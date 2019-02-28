@@ -1145,7 +1145,6 @@ void *RobotisController::timerThread(void *param)
 
 void RobotisController::startTimer()
 {
-  printf("robot startTimer1\n");
   if (this->is_timer_running_ == true)
     return;
 
@@ -1192,8 +1191,8 @@ void RobotisController::startTimer()
       RCLCPP_ERROR(robot_node_->get_logger(),"Creating timer thread failed!!");
       exit(-1);
     }
+  
   }
-
   this->is_timer_running_ = true;
 }
 
