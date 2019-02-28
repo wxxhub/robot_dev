@@ -6,6 +6,7 @@
 
 const std::string NONE_STRING = "";
 const std::string INIT_PATH = "/data/ini_pose.yaml";
+rclcpp::Clock ros_clock(RCL_SYSTEM_TIME);
 
 namespace robotis_op
 {
@@ -74,27 +75,88 @@ void BaseModule::queueThread()
 
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
+  if (enable_ == false)
+    return;
 
+  /*----- write curr position -----*/
+  std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter;
+  for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
+  {
+    std::string joint_name = state_iter->first;
+
+    robotis_framework::Dynamixel *dxl = NULL;
+    std::map<std::string, robotis_framework::Dynamixel*>::iterator dxl_it;
+    dxl_it = dxls.find(joint_name);
+    if (dxl_it != dxls.end())
+      dxl = dxl_it->second;
+    else
+      continue;
+    
+    double joint_curr_position = dxl->dxl_state_->present_position_;
+    double joint_goal_position = dxl->dxl_state_->goal_position_;
+
+    joint_state_->curr_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_curr_position;
+    joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_goal_position;
+  }
+
+  has_goal_joints_ = true;
+
+  /* ----- send trajectory ----- */
+  if (base_module_state_->is_moving_ == true)
+  {
+    if (base_module_state_->cnt_ == 1)
+      publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_INFO, "Start Init Pose");
+
+    for (int id = 1; id <= MAX_JOINT_ID; id++)
+      joint_state_->goal_joint_state_[id].position_ = base_module_state_->calc_joint_tra_(base_module_state_->cnt_, id);
+
+    base_module_state_->cnt_++;
+  }
+
+  /*----- set joint data -----*/
+  for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
+  {
+    std::string joint_name = state_iter->first;
+    result_[joint_name]->goal_position_ = joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_;
+  } 
+
+  /*---------- initialize count number ----------*/
+
+  if ((base_module_state_->cnt_ >= base_module_state_->all_time_steps_) && (base_module_state_->is_moving_ == true))
+  {
+    RCLCPP_INFO(module_node_->get_logger(), "[end] send trajectory");
+    publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_INFO, "Finish Init Pose");
+
+    base_module_state_->is_moving_ = false;
+    base_module_state_->cnt_ = 0;
+
+    // set all joints -> none
+    if (ini_pose_only_ == true)
+    {
+      setCtrlModule("none");
+      ini_pose_only_ = false;
+    }
+  }
 }
 
 void BaseModule::stop()
 {
-
+  return;
 }
 
 bool BaseModule::isRunning()
 {
-
+  return base_module_state_->is_moving_;
 }
 
 void BaseModule::onModuleEnable()
 {
-
+  RCLCPP_INFO(module_node_->get_logger(), "Base Module is enabled");
 }
 
 void BaseModule::onModuleDisable()
 {
-
+  has_goal_joints_ = false;
 }
 
 void BaseModule::initPoseMsgCallback(const std_msgs::msg::String::SharedPtr msg)
@@ -125,27 +187,146 @@ void BaseModule::initPoseMsgCallback(const std_msgs::msg::String::SharedPtr msg)
 
 void BaseModule::initPoseTrajGenerateProc()
 {
+  for (int id = 1; id <= MAX_JOINT_ID; id++)
+  {
+    double ini_value = joint_state_->goal_joint_state_[id].position_;
+    double tar_value = base_module_state_->joint_ini_pose_.coeff(id, 0);
 
+    Eigen::MatrixXd tra;
+
+    if (base_module_state_->via_num_ == 0)
+    {
+      tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
+                                                  base_module_state_->smp_time_, base_module_state_->mov_time_);
+    }
+    else
+    {
+      Eigen::MatrixXd via_value = base_module_state_->joint_via_pose_.col(id);
+      Eigen::MatrixXd d_via_value = base_module_state_->joint_via_dpose_.col(id);
+      Eigen::MatrixXd dd_via_value = base_module_state_->joint_via_ddpose_.col(id);
+
+      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(base_module_state_->via_num_, ini_value, 0.0, 0.0,
+                                                               via_value, d_via_value, dd_via_value, tar_value, 0.0,
+                                                               0.0, base_module_state_->smp_time_,
+                                                               base_module_state_->via_time_,
+                                                               base_module_state_->mov_time_);
+    }
+    
+    base_module_state_->calc_joint_tra_.block(0, id, base_module_state_->all_time_steps_, 1) = tra;
+  }
+
+  base_module_state_->is_moving_ = true;
+  base_module_state_->cnt_ = 0;
+  RCLCPP_INFO(module_node_->get_logger(), "[start] send trajectory");
 }
 
 void BaseModule::poseGenerateProc(Eigen::MatrixXd joint_angle_pose)
 {
+  callServiceSettingModule(module_name_);
 
+  while (enable_ == false || has_goal_joints_ == false)
+    usleep(8 * 1000);
+
+  base_module_state_->mov_time_ = 1.0;
+  base_module_state_->all_time_steps_ = int(base_module_state_->mov_time_ / base_module_state_->smp_time_) + 1;
+
+  base_module_state_->calc_joint_tra_.resize(base_module_state_->all_time_steps_, MAX_JOINT_ID + 1);
+
+  base_module_state_->joint_pose_ = joint_angle_pose;
+
+  for (int id = 1; id <= MAX_JOINT_ID; id++)
+  {
+    double ini_value = joint_state_->goal_joint_state_[id].position_;
+    double tar_value = base_module_state_->joint_pose_.coeff(id, 0);
+
+    // ROS_INFO_STREAM("[ID : " << id << "] ini_value : " << ini_value << "  tar_value : " << tar_value);
+    RCLCPP_INFO(module_node_->get_logger(), "[ID ： %d] ini_value : %f  tar_value : %f", id, ini_value, tar_value);
+
+    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
+                                                                base_module_state_->smp_time_,
+                                                                base_module_state_->mov_time_);
+
+    base_module_state_->calc_joint_tra_.block(0, id, base_module_state_->all_time_steps_, 1) = tra;
+  }
+
+  base_module_state_->is_moving_ = true;
+  base_module_state_->cnt_ = 0;
+  ini_pose_only_ = true;
+  RCLCPP_INFO(module_node_->get_logger(), "[start] send trajectory");
 }
 
 void BaseModule::poseGenerateProc(std::map<std::string, double>& joint_angle_pose)
 {
+  callServiceSettingModule(module_name_);
 
+  while (enable_ == false || has_goal_joints_ == false)
+    usleep(8 * 1000);
+
+  Eigen::MatrixXd target_pose = Eigen::MatrixXd::Zero( MAX_JOINT_ID + 1, 1);
+
+  for (std::map<std::string, double>::iterator joint_angle_it = joint_angle_pose.begin();
+       joint_angle_it != joint_angle_pose.end(); joint_angle_it++)
+  {
+    std::string joint_name = joint_angle_it->first;
+    double joint_angle_rad = joint_angle_it->second;
+
+    std::map<std::string, int>::iterator joint_name_to_id_it = joint_name_to_id_.find(joint_name);
+    if (joint_name_to_id_it != joint_name_to_id_.end())
+    {
+      target_pose.coeffRef(joint_name_to_id_it->second, 0) = joint_angle_rad;
+    }
+  }
+
+  base_module_state_->joint_pose_ = target_pose;
+
+  base_module_state_->mov_time_ = 5.0;
+  base_module_state_->all_time_steps_ = int(base_module_state_->mov_time_ / base_module_state_->smp_time_) + 1;
+
+  base_module_state_->calc_joint_tra_.resize(base_module_state_->all_time_steps_, MAX_JOINT_ID + 1);
+
+  for (int id = 1; id <= MAX_JOINT_ID; id++)
+  {
+    double ini_value = joint_state_->goal_joint_state_[id].position_;
+    double tar_value = base_module_state_->joint_pose_.coeff(id, 0);
+
+    // ROS_INFO_STREAM("[ID : " << id << "] ini_value : " << ini_value << "  tar_value : " << tar_value);
+    RCLCPP_INFO(module_node_->get_logger(), "[ID ： %d] ini_value : %f  tar_value : %f", id, ini_value, tar_value);
+
+    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
+                                                                base_module_state_->smp_time_,
+                                                                base_module_state_->mov_time_);
+
+    base_module_state_->calc_joint_tra_.block(0, id, base_module_state_->all_time_steps_, 1) = tra;
+  }
+
+  base_module_state_->is_moving_ = true;
+  base_module_state_->cnt_ = 0;
+  ini_pose_only_ = true;
+  RCLCPP_INFO(module_node_->get_logger(), "[start] send trajectory");
 }
 
 void BaseModule::setCtrlModule(std::string module)
 {
+  std_msgs::msg::String control_msg;
+  control_msg.data = module_name_;
 
+  set_ctrl_module_pub_->publish(control_msg);
 }
 
 void BaseModule::callServiceSettingModule(const std::string &module_name)
 {
+  auto set_module_srv = std::make_shared<robotis_controller_msgs::srv::SetModule::Request>();
+  set_module_srv->module_name = module_name;
 
+  auto result_future = set_module_client_->async_send_request(set_module_srv);
+  if (rclcpp::spin_until_future_complete(module_node_, result_future) != 
+        rclcpp::executor::FutureReturnCode::SUCCESS)
+  {
+    RCLCPP_ERROR(module_node_->get_logger(), "Failed to set module");
+    return;
+  }
+
+  return ;
 }
 
 void BaseModule::parseInitPoseData(const std::string &path)
@@ -222,7 +403,13 @@ void BaseModule::parseInitPoseData(const std::string &path)
 
 void BaseModule::publishStatusMsg(unsigned int type, std::string msg)
 {
+  robotis_controller_msgs::msg::StatusMsg status_msg;
+  status_msg.header.stamp = ros_clock.now();
+  status_msg.type = type;
+  status_msg.module_name = "Base";
+  status_msg.status_msg = msg;
 
+  status_msg_pub_->publish(status_msg);
 }
 
 }  // namespace robotis_op
