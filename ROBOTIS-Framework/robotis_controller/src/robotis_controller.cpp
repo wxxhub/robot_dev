@@ -22,6 +22,7 @@ RobotisController::RobotisController()
 bool RobotisController::initialize(const std::string robot_file_path, const std::string init_file_path)
 {
 //   std::string dev_desc_dir_path = ros::package::getPath("robotis_device") + "/devices";
+
   RCLCPP_INFO(robot_node_->get_logger(), "robot init");
   std::string dev_desc_dir_path;
   dev_desc_dir_path = "/home/wxx/robot_dev/src/ROBOTIS-Framework/robotis_device";
@@ -667,8 +668,9 @@ void RobotisController::msgQueueThread()
   auto load_offset_server      = robot_node_->create_service<robotis_controller_msgs::srv::LoadOffset>(
     "/robotis/load_offset", std::bind(&RobotisController::loadOffsetService, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), qos_profile);
 
-  rclcpp::WallRate loop_rate(robot_->getControlCycle() / 1000.0);
+  rclcpp::WallRate loop_rate(robot_->getControlCycle());
   while (rclcpp::ok())
+    rclcpp::spin_some(robot_node_);
     loop_rate.sleep();
 }
 
@@ -745,7 +747,7 @@ void RobotisController::setCtrlModuleThread(std::string ctrl_module)
   queue_mutex_.lock();
 
   if (DEBUG_PRINT)
-    RCLCPP_INFO(robot_node_->get_logger(),"set module : %s",ctrl_module);
+    RCLCPP_INFO(robot_node_->get_logger(),"set module : %s",ctrl_module.c_str());
 
   // none
   if ((ctrl_module == "") || (ctrl_module == "none"))
@@ -1143,9 +1145,11 @@ void *RobotisController::timerThread(void *param)
 
 void RobotisController::startTimer()
 {
+  printf("robot startTimer1\n");
   if (this->is_timer_running_ == true)
     return;
 
+  printf("robot startTimer2\n");
   if (this->gazebo_mode_ == true)
   {
     // create and start the thread
@@ -1153,6 +1157,7 @@ void RobotisController::startTimer()
   }
   else
   {
+    printf("robot init\n");
     initializeSyncWrite();
 
     for (auto& it : port_to_bulk_read_)

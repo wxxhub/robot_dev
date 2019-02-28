@@ -1,6 +1,7 @@
 
 /* Author: wxx */
 #include <iostream>
+#include <chrono>
 /* ROS API Header */
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.h>
@@ -21,6 +22,9 @@
 using namespace robotis_framework;
 using namespace dynamixel;
 using namespace robotis_op;
+using namespace std::chrono_literals;
+
+rclcpp::Node::SharedPtr manager_node = nullptr;
 
 const int BAUD_RATE = 2000000;
 const double PROTOCOL_VERSION = 2.0;
@@ -44,29 +48,13 @@ std::string g_robot_file;
 std::string g_init_file;
 std::string g_device_name;
 
-// ros::Publisher g_init_pose_pub;
-// ros::Publisher g_demo_command_pub;
+
 rclcpp::Publisher<std_msgs::msg::String>::SharedPtr g_init_pose_pub;
 rclcpp::Publisher<std_msgs::msg::String>::SharedPtr g_demo_command_pub;
 
-void parseInitPoseData(const std::string &path)
+void dxlTorqueCheckCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-  YAML::Node doc;
-  try
-  {
-    // load yaml
-    doc = YAML::LoadFile(path.c_str());
-  } catch (const std::exception& e)
-  {
-    printf("Fail to load yaml file.");
-    return;
-  }
-
-  // parse movement time
-  // int mov_time;
-  // mov_time = doc[NONE_STRING].as<double>();
-  // std::cout<<"test: "<<mov_time<<std::endl;
-
+  RCLCPP_INFO(manager_node->get_logger(), "I heard: '%s'", msg->data.c_str());
 }
 
 int main(int argc, char ** argv)
@@ -76,7 +64,7 @@ int main(int argc, char ** argv)
 	std::cout << "manager run path: " << buffer << std::endl;
 
   rclcpp::init(argc, argv);
-  auto manager_node = rclcpp::Node::make_shared("op3_manager");
+  manager_node = rclcpp::Node::make_shared("op3_manager");
 
   RCLCPP_INFO(manager_node->get_logger(),"manager init");
 
@@ -90,9 +78,13 @@ int main(int argc, char ** argv)
   manager_node->get_parameter_or("baud_rate", g_baudrate, BAUD_RATE);
   manager_node->get_parameter_or("gazebo", controller->gazebo_mode_, false);
   std::cout<<"g_device_name: "<<g_device_name<<std::endl;
-  // parseInitPoseData(g_offset_file);
   // printf("g_device_name:%s\n", g_device_name);
 
+  /* ros2 message */
+  auto subscription = manager_node->create_subscription<std_msgs::msg::String>
+      ("topic", dxlTorqueCheckCallback);
+
+  g_init_pose_pub = manager_node->create_publisher<std_msgs::msg::String>("/robotis/base/ini_pose");
   g_is_simulation = controller->gazebo_mode_;
 
 /*
@@ -182,7 +174,7 @@ int main(int argc, char ** argv)
     if (robot_name != NONE_STRING)
       controller->gazebo_robot_name_ = robot_name;
   }
- 
+  */
   if (g_robot_file == "")
   {
     RCLCPP_ERROR(manager_node->get_logger(), "NO robot file path in the ROS parameters.");
@@ -202,14 +194,14 @@ int main(int argc, char ** argv)
   if (g_offset_file != "")
     controller->loadOffset(g_offset_file);
   usleep(300 * 1000);
-    */
+  
  RCLCPP_INFO(manager_node->get_logger(), "start add module");
   /* Add Sensor Module */
   // controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
 
   /* Add Motion Module */
   // controller->addMotionModule((MotionModule*) ActionModule::getInstance());
-  controller->addMotionModule((MotionModule*) BaseModule::getInstance());
+  // controller->addMotionModule((MotionModule*) BaseModule::getInstance());
   // controller->addMotionModule((MotionModule*) HeadControlModule::getInstance());
   // controller->addMotionModule((MotionModule*) WalkingModule::getInstance());
   // controller->addMotionModule((MotionModule*) DirectControlModule::getInstance());
@@ -219,9 +211,14 @@ int main(int argc, char ** argv)
 
   RCLCPP_INFO(manager_node->get_logger(), "finished add module");
   // start timer
-  // controller->startTimer();
+  // try{
+  //   controller->startTimer();
+  // }catch(const std::exception& e)
+  // {
+  //   printf("controller start failed\n");
+  // }
 
-  usleep(10000 * 1000);
+  usleep(100 * 1000);
 
   // go to init pose
   std_msgs::msg::String init_msg;
@@ -230,13 +227,12 @@ int main(int argc, char ** argv)
   g_init_pose_pub->publish(init_msg);
   RCLCPP_INFO(manager_node->get_logger(), "Go to init pose");
 
+  rclcpp::WallRate loop_rate(1ms);
   while (rclcpp::ok())
   {
-    usleep(1 * 1000);
-    rclcpp::spin(manager_node);
+    rclcpp::spin_some(manager_node);
+    loop_rate.sleep();
   }
-
-  printf("finished\n");
   rclcpp::shutdown();
   return 0;
 }
