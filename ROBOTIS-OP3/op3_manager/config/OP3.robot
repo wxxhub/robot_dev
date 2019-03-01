@@ -3,7 +3,7 @@ control_cycle = 8   # milliseconds
 
 [ port info ]
 # PORT NAME  | BAUDRATE  | DEFAULT JOINT
-/dev/ttyUSB0 | 2000000   | r_sho_pitch
+/dev/ttyUSB0 | 1000000   | r_sho_pitch
 
 [ device info ]
 # TYPE    | PORT NAME    | ID  | MODEL          | PROTOCOL | DEV NAME       | BULK READ ITEMS

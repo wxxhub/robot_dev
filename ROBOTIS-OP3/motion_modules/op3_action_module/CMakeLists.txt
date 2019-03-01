@@ -26,6 +26,7 @@ find_package(robotis_framework_common REQUIRED)
 find_package(robotis_device REQUIRED)
 
 find_package(Boost REQUIRED)
+find_package(dynamixel_sdk REQUIRED)
 
 add_library(action_module src/action_module.cpp)
 target_include_directories(action_module PUBLIC
@@ -39,6 +40,7 @@ ament_target_dependencies(
   "op3_action_module_msgs"
   "robotis_framework_common"
   "robotis_device"
+  "dynamixel_sdk"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

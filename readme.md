@@ -5,7 +5,9 @@
 #### 开发环境
 > Ubantu18, ROS2-crystal, ROS2-bouncy-ament    
 > ROS2-bouncy版本，launch无法实现传参    
-> 而ROS2-crystal，没有ament    
+> 而ROS2-crystal，没有ament   可以使用colcon **sudo apt install python3-colcon-common-extensions** 
+colcon build --symlink-install
+colcon build --packages-select dynamixel_sdk
 
 #### yaml-cpp  
 > ```` sudo apt-get install libyaml-cpp-dev ````  

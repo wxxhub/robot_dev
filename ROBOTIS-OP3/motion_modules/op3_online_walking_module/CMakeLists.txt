@@ -29,6 +29,7 @@ find_package(robotis_device REQUIRED)
 find_package(robotis_math REQUIRED)
 find_package(op3_balance_control REQUIRED)
 find_package(Boost REQUIRED)
+find_package(dynamixel_sdk REQUIRED)
 
 add_library(online_walking_module src/online_walking_module.cpp)
 target_include_directories(online_walking_module PUBLIC
@@ -46,6 +47,7 @@ ament_target_dependencies(
   "robotis_device"
   "robotis_math"
   "op3_balance_control"
+  "dynamixel_sdk"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

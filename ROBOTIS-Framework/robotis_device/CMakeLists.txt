@@ -22,7 +22,6 @@ find_package(rclcpp REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
 
 add_library(robotis_device 
-    src/robotis_device.cpp
     src/robotis_device/dynamixel.cpp
     src/robotis_device/robot.cpp
     src/robotis_device/sensor.cpp)
