@@ -36,7 +36,7 @@ void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
     if (first_image)
     {
         image_width = msg->width;
-        image_heidht = msg->height;
+        image_height = msg->height;
         first_image = false;
     }
 
@@ -59,7 +59,7 @@ void RoadDetector::process(Mat image)
     if (first_image)
     {
         image_width = image.cols;
-        image_heidht = image.rows;
+        image_height = image.rows;
         first_image = false;
     }
     input_image_ = image.clone();
@@ -267,7 +267,7 @@ bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
     // 是否到路线端头
     if (result_.up_point.x < image_width * 0.1 || 
         result_.up_point.x > image_width * 0.9 ||
-        result_.up_point.y < image_heidht * 0.3)
+        result_.up_point.y < image_height * 0.3)
     {
         return false;
     }
@@ -354,7 +354,7 @@ void RoadDetector::publishResult()
     message.down_y = result_.down_point.y;
     message.direction = result_.direction;
     message.image_width = image_width;
-    message.image_height = image_heidht;
+    message.image_height = image_height;
     result_pub_->publish(message);
 }
 

@@ -20,6 +20,5 @@ def generate_launch_description():
             output='screen', parameters=parameters),
     ])
 
-
     # parameters=[{ 'use_sim_time': use_sim_time}, { 'yaml_filename': map_yaml_file }]
 

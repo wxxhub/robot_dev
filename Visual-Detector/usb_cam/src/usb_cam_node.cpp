@@ -97,8 +97,6 @@ int main(int argc, char ** argv)
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image0");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
     device_thread.detach();
-    // process_thread.push_back(device_thread);
-    // run_pub.push_back(device);
   }
 
   if (device_1_num != -1)
@@ -108,8 +106,6 @@ int main(int argc, char ** argv)
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image1");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
     device_thread.detach();
-    // process_thread.push_back(device_thread);
-    // run_pub.push_back(device);
   }
 
   if (device_2_num != -1)
@@ -119,8 +115,6 @@ int main(int argc, char ** argv)
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image2");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
     device_thread.detach();
-    // process_thread.push_back(device_thread);
-    // run_pub.push_back(device);
   }
 
   if (device_3_num != -1)
@@ -130,8 +124,6 @@ int main(int argc, char ** argv)
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image3");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
     device_thread.detach();
-    // process_thread.push_back(device_thread);
-    // run_pub.push_back(device);
   }
 
   if (device_4_num != -1)
@@ -141,16 +133,7 @@ int main(int argc, char ** argv)
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image4");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
     device_thread.detach();
-    // process_thread.push_back(device_thread);
-    // run_pub.push_back(device);
   }
-  
-  // for (int i = 0; i < process_thread.size(); i++)
-  //   process_thread[i].join();
-  // for (int i = 0; i < run_pub.size(); i++)
-  // {
-  //   boost::thread queue_thread_ = boost::thread(boost::bind(&pubThread, run_pub[i]));
-  // }
 
   rclcpp::WallRate loop_rate(50);
 

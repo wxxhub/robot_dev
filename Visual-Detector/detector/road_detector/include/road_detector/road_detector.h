@@ -1,5 +1,5 @@
-#ifndef ROAD_DETECTOR__ROAD_DETECTOR_HPP_
-#define ROAD_DETECTOR__ROAD_DETECTOR_HPP_
+#ifndef ROAD_DETECTOR__ROAD_DETECTOR_H_
+#define ROAD_DETECTOR__ROAD_DETECTOR_H_
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <boost/thread.hpp>
@@ -70,8 +70,6 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
 
   rclcpp::Publisher<road_detector_msgs::msg::RoadResult>::SharedPtr result_pub_;
-
-  boost::thread queue_thread_;
   
   bool new_image_;
   bool show_result_;
@@ -83,7 +81,7 @@ private:
   int half_mark_rect_width;
 
   int image_width;
-  int image_heidht;
+  int image_height;
 
   ArrowDetector arrow_detector_;
 
@@ -95,4 +93,4 @@ private:
 
 }  // namespace detector_module
 
-#endif  // ROAD_DETECTOR__ROAD_DETECTOR_HPP_
+#endif  // ROAD_DETECTOR__ROAD_DETECTOR_H_
