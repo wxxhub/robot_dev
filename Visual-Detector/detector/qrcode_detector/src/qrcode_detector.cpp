@@ -44,6 +44,13 @@ void QRCodeDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 
 void QRCodeDetector::process(Mat image)
 {
+    static bool first_image = true;
+    if (first_image)
+    {
+        image_width_ = image.cols;
+        image_height_ = image.rows;
+        first_image = false;
+    }
     detector(image);
     publishResult();
 
