@@ -16,6 +16,8 @@ const std::string DEVICE_2_NAME = "device_2";
 const std::string DEVICE_3_NAME = "device_3";
 const std::string DEVICE_4_NAME = "device_4";
 
+boost::mutex  open_video_mutex_;
+
 struct DeviceInfo
 {
   int device_num = -1;
@@ -53,6 +55,7 @@ void convert_frame_to_message(const cv::Mat & frame, size_t frame_id, sensor_msg
 
 void pubThread(DeviceInfo device)
 {
+  printf ("start thread: %d\n", device.device_num);
   VideoCapture cap(device.device_num);
   if (!cap.isOpened())
   {
@@ -79,6 +82,7 @@ int main(int argc, char ** argv)
   int device_3_num = -1;
   int device_4_num = -1;
 
+  printf("test1\n");
   rclcpp::init(argc, argv);
   auto cam_node = rclcpp::Node::make_shared("usb_cam");
 
@@ -88,6 +92,7 @@ int main(int argc, char ** argv)
   cam_node->get_parameter_or("device_3_num", device_3_num, NO_DEVICE_NUM);
   cam_node->get_parameter_or("device_4_num", device_4_num, NO_DEVICE_NUM);
 
+  printf("test2\n");
   std::vector<DeviceInfo> run_pub;
   std::vector<boost::thread*> process_thread;
   if (device_0_num != -1)
@@ -134,7 +139,7 @@ int main(int argc, char ** argv)
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
     device_thread.detach();
   }
-
+  printf("test3\n");
   rclcpp::WallRate loop_rate(50);
 
   while (rclcpp::ok())
@@ -142,6 +147,5 @@ int main(int argc, char ** argv)
     loop_rate.sleep();
   }
 
-  printf("hello world usb_cam package\n");
   return 0;
 }

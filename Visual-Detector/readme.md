@@ -9,3 +9,4 @@
 ## 目录
 > [usb_cam](usb_cam/readme.md)  
 > [road_detector](detector/road_detector/readme.md)  
+> [qrcode_detecctor](detector/readme.md)  

@@ -28,7 +28,6 @@ QRCodeDetector::~QRCodeDetector()
 void QRCodeDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
   static bool first_image = true;
-  // printf("new image test\n");
   Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
             const_cast<unsigned char *>(msg->data.data()), msg->step);
   
@@ -132,7 +131,6 @@ void QRCodeDetector::showResult(Mat image)
   catch (const std::exception& e)
   {
     std::cerr << "QRcode_result: " << e.what() << '\n';
-    // print ("imshow QRcode_result failed!\n");
   }
   
 }

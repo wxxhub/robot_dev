@@ -13,8 +13,8 @@ RoadDetector::RoadDetector()
       show_result_(false),
       mark_detector_(true),
       wite_background_(true),
-      mark_rect_width(120),
-      half_mark_rect_width(mark_rect_width/2)
+      mark_rect_width_(120),
+      half_mark_rect_width_(mark_rect_width_/2)
 {
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
 
@@ -35,8 +35,8 @@ void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
     
     if (first_image)
     {
-        image_width = msg->width;
-        image_height = msg->height;
+        image_width_ = msg->width;
+        image_height_ = msg->height;
         first_image = false;
     }
 
@@ -48,9 +48,7 @@ void RoadDetector::process()
 {
     detector(input_image_);
     publishResult();
-    imshow("road_detector", input_image_);
     showResult(input_image_);
-    cvWaitKey(1);
 }
 
 void RoadDetector::process(Mat image)
@@ -58,15 +56,14 @@ void RoadDetector::process(Mat image)
     static bool first_image = true;
     if (first_image)
     {
-        image_width = image.cols;
-        image_height = image.rows;
+        image_width_ = image.cols;
+        image_height_ = image.rows;
         first_image = false;
     }
     input_image_ = image.clone();
     detector(input_image_);
     publishResult();
-    imshow("road_detector", input_image_);
-    cvWaitKey(1);
+    showResult(image);
 }
 
 int RoadDetector::detector(Mat image)
@@ -265,15 +262,15 @@ bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
         return false;
 
     // 是否到路线端头
-    if (result_.up_point.x < image_width * 0.1 || 
-        result_.up_point.x > image_width * 0.9 ||
-        result_.up_point.y < image_height * 0.3)
+    if (result_.up_point.x < image_width_ * 0.1 || 
+        result_.up_point.x > image_width_ * 0.9 ||
+        result_.up_point.y < image_height_ * 0.3)
     {
         return false;
     }
 
     // 路标区域超出图片范围
-    if (result_.up_point.x - half_mark_rect_width <= 0 || result_.up_point.x + half_mark_rect_width >= image_width)
+    if (result_.up_point.x - half_mark_rect_width_ <= 0 || result_.up_point.x + half_mark_rect_width_ >= image_width_)
     {
         return false;
     }
@@ -290,7 +287,7 @@ bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
     warpAffine(input_image_, rotated_image, rotated_mat, input_image_.size(), INTER_CUBIC, 1);
 
     //路线上部的一片区域
-    //---- mark_rect_width
+    //---- mark_rect_width_
 
     //    ----
     //    |   |     mark_rect   标记所在区域 ; * result.up_point 
@@ -299,7 +296,7 @@ bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
     //      |
     //      @       @ result.down_point 
 
-    Rect mark_rect = Rect(result_.up_point.x - half_mark_rect_width, result_.up_point.y - mark_rect_width, mark_rect_width, mark_rect_width);
+    Rect mark_rect = Rect(result_.up_point.x - half_mark_rect_width_, result_.up_point.y - mark_rect_width_, mark_rect_width_, mark_rect_width_);
     mark_rect &= Rect(0, 0, rotated_image.cols, rotated_image.rows);
     rotated_image(mark_rect).copyTo(mark_image);
 
@@ -367,8 +364,8 @@ void RoadDetector::publishResult()
     message.down_x = result_.down_point.x;
     message.down_y = result_.down_point.y;
     message.direction = result_.direction;
-    message.image_width = image_width;
-    message.image_height = image_height;
+    message.image_width = image_width_;
+    message.image_height = image_height_;
     result_pub_->publish(message);
 }
 

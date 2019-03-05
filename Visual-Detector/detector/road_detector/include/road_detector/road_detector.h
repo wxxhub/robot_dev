@@ -40,7 +40,6 @@ public:
 		up_point = cv::Point2f(0,0);
 		down_point = cv::Point2f(0,0);
 		direction = DIRECT;
-		
 	}
 };
 
@@ -78,11 +77,11 @@ private:
   const Color road_color;
   const bool wite_background_;
 
-  int mark_rect_width;
-  int half_mark_rect_width;
+  int mark_rect_width_;
+  int half_mark_rect_width_;
 
-  int image_width;
-  int image_height;
+  int image_width_;
+  int image_height_;
 
   ArrowDetector arrow_detector_;
 
