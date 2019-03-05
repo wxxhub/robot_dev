@@ -9,7 +9,7 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   auto qrcode_detector = std::make_shared<detector_module::QRCodeDetector>();
   rclcpp::WallRate loop_rate(30);
-
+  qrcode_detector->setShowResult(true);
   while (rclcpp::ok())
   {
     rclcpp::spin_some(qrcode_detector);

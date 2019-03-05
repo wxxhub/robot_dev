@@ -3,7 +3,7 @@
 using namespace detector_module;
 using namespace cv;
 
-#define IMAGE_DEBUG
+// #define IMAGE_DEBUG
 
 ArrowDetector::ArrowDetector()
     : background_threshold_(128)

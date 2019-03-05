@@ -10,7 +10,7 @@ RoadDetector::RoadDetector()
     : new_image_(false),
       Node("road_detector"),
       road_color(RED),
-      show_result_(true),
+      show_result_(false),
       mark_detector_(true),
       wite_background_(true),
       mark_rect_width(120),
@@ -315,17 +315,31 @@ void RoadDetector::showResult(cv::Mat image)
 {
     if (show_result_)
     {
-        Mat show_img = image.clone();
+        Mat result_image = image.clone();
         Point2f vertices[4];  
         road_rect_.points(vertices);  
         for (int i = 0; i < 4; i++)  
-            line(show_img, vertices[i], vertices[(i+1)%4], Scalar(255,255,0)); 
+            line(result_image, vertices[i], vertices[(i+1)%4], Scalar(255,255,0)); 
 
-        line(show_img, result_.up_point, result_.down_point, Scalar(0,255,0),5);
-        circle(show_img, result_.up_point,13,Scalar(255,0,0),3);
-        circle(show_img, result_.down_point,13,Scalar(0,0,255),3);
-        imshow("show_img", show_img);
+        line(result_image, result_.up_point, result_.down_point, Scalar(0,255,0),5);
+        circle(result_image, result_.up_point,13,Scalar(255,0,0),3);
+        circle(result_image, result_.down_point,13,Scalar(0,0,255),3);
+
+        try
+        {
+            imshow("Roade_result", result_image);
+            cvWaitKey(1);
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << "Roade_result: " << e.what() << '\n';
+        }
     }
+}
+
+void RoadDetector::setShowResult(bool show_result)
+{
+  show_result_ = show_result;
 }
 
 bool RoadDetector::newImage()

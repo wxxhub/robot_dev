@@ -21,10 +21,7 @@ struct QRCodeInfo
 {
   std::string type_name;
   std::string data;
-  int local_x;
-  int local_y;
-  int width;
-  int height;
+  cv::Point vertex_position[4];
 };
 
 
@@ -42,6 +39,7 @@ public:
 
   bool newImage();
   void showResult(cv::Mat image);
+  void setShowResult(bool show_result);
   int encodingToMatType(const std::string & encoding);
 
 private:
@@ -52,6 +50,7 @@ private:
   rclcpp::Publisher<qrcode_detector_msgs::msg::QRCodeMsg>::SharedPtr result_pub_;
 
   bool new_image_;
+  bool show_result_;
 
   cv::Mat input_image_;
 

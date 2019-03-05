@@ -20,6 +20,7 @@ int main(int argc, char ** argv)
   Mat image;
   auto qrcode_detector = std::make_shared<detector_module::QRCodeDetector>();
 
+  qrcode_detector->setShowResult(true);
   while(rclcpp::ok())
   {
     cap>>image;

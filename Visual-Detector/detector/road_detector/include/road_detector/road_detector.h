@@ -59,6 +59,7 @@ public:
   bool getMarkImage(cv::Mat mark_image, float &road_angle);
   bool newImage();
   void showResult(cv::Mat image);
+  void setShowResult(bool show_result);
   int encodingToMatType(const std::string & encoding);
 
 private:

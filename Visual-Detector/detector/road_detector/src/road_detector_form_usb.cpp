@@ -9,7 +9,7 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   auto road_detector = std::make_shared<detector_module::RoadDetector>();
   rclcpp::WallRate loop_rate(30);
-
+  road_detector->setShowResult(true);
   while (rclcpp::ok())
   {
     rclcpp::spin_some(road_detector);
