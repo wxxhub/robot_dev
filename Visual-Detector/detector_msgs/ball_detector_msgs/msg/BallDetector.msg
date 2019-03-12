@@ -1,0 +1,4 @@
+geometry_msgs/Point32 center_position
+int32 radius
+int32 image_width
+int32 image_height

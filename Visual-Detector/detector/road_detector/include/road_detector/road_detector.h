@@ -47,8 +47,7 @@ class RoadDetector : public rclcpp::Node
 {
 public:
   RoadDetector();
-
-  virtual ~RoadDetector();
+  ~RoadDetector();
 
   // cv 
   void process(cv::Mat image);

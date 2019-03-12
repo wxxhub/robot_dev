@@ -29,8 +29,7 @@ class QRCodeDetector : public rclcpp::Node
 {
 public:
   QRCodeDetector();
-
-  virtual ~QRCodeDetector();
+  ~QRCodeDetector();
 
   // cv
   void process(cv::Mat image);

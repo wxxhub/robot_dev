@@ -34,17 +34,21 @@ ArrowDirection ArrowDetector::getDirection(Mat mark_image, bool wite_background)
             max_area = now_area;
             max_mark_rect = boundingRect(contours_mark[i]);
         }
-        // Point p1 = Point(boundingRect(contours_mark[i]).x,boundingRect(contours_mark[i]).y);
-        // Point p2 = Point(boundingRect(contours_mark[i]).x + boundingRect(contours_mark[i]).width,boundingRect(contours_mark[i]).y + boundingRect(contours_mark[i]).height);
-        // rectangle(mark_image_,p1,p2,Scalar(255,0,0),1,8,0);
     }
 
     Mat mark;
     threshold(mark_watershed(max_mark_rect), mark, 130.0, 255.0, CV_THRESH_BINARY);
     
 #ifdef IMAGE_DEBUG
-    imshow("mark", mark);
-    imshow("mark_image_2", mark_image_);
+    try
+    {
+        imshow("mark", mark);
+        imshow("mark_image_2", mark_image_);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
 
     Mat mark2 = mark.clone();
@@ -94,7 +98,14 @@ ArrowDirection ArrowDetector::getDirection(Mat mark_image, bool wite_background)
     }
 
 #ifdef IMAGE_DEBUG
-    imshow("arrow_image", arrow_image);
+    try
+    {
+        imshow("arrow_image", arrow_image);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
 
     if (arrow_image.cols*1.2 < arrow_image.rows)
@@ -167,11 +178,18 @@ void ArrowDetector::getWatershedMark(Mat mark_image_, bool wite_background, Mat 
     mark_gray2.convertTo(mark_watershed,CV_8U); 
 
 #ifdef IMAGE_DEBUG
-    imshow("mark_gray", mark_gray);
-    imshow("arrrow_gray", arrrow_gray);
-    imshow("background_gray", background_gray);
-    imshow("mark_gray2", mark_gray2);
-    imshow("watershed_marker", mark_watershed);
+    try
+    {
+        imshow("mark_gray", mark_gray);
+        imshow("arrrow_gray", arrrow_gray);
+        imshow("background_gray", background_gray);
+        imshow("mark_gray2", mark_gray2);
+        imshow("watershed_marker", mark_watershed);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
     return;
 }

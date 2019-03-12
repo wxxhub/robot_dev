@@ -12,8 +12,7 @@ class BallDetector : public rclcpp::Node
 {
 public:
   BallDetector();
-
-  virtual ~BallDetector();
+  ~BallDetector();
 
 private:
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;

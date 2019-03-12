@@ -70,10 +70,10 @@ int RoadDetector::detector(Mat image)
 {
     Mat lab;
     std::vector<Mat> mv;
-    Mat road_lab, mark_lab;
+    Mat road_lab;
     Point2f up_point,down_point;
     cvtColor(image, lab, COLOR_BGR2Lab);
-    imshow("road_detector lab", lab);
+    // imshow("road_detector lab", lab);
 
     split(lab, mv);
 
@@ -109,11 +109,15 @@ int RoadDetector::detector(Mat image)
             break;
     }
 
-    // mark_test
-    mark_lab = 255-mv[2];
-
 #ifdef IMAGE_DEBUG
-    imshow("road_lab", road_lab);
+    try
+    {
+        imshow("road_lab", road_lab);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
 
     float road_angle = 0;
@@ -162,7 +166,14 @@ bool RoadDetector::getRoad(Mat road_lab, Point2f &up_point, Point2f &down_point,
     threshold(road_lab, road_binary, 0, 255.0, CV_THRESH_BINARY | THRESH_OTSU);
 
 #ifdef IMAGE_DEBUG
-    // imshow("road_binary", road_binary);
+    try
+    {
+        // imshow("road_binary", road_binary);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
 
     //膨胀处理
@@ -246,7 +257,14 @@ bool RoadDetector::getRoad(Mat road_lab, Point2f &up_point, Point2f &down_point,
     // 避免突然闪烁全图识别
 
 #ifdef IMAGE_DEBUG
-    imshow("after_road_binary", road_binary);
+    try
+    {
+        imshow("after_road_binary", road_binary);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
 
     if (max_rect_area > 0.6 * road_lab.cols * road_lab.rows)
@@ -301,8 +319,15 @@ bool RoadDetector::getMarkImage(cv::Mat mark_image, float &road_angle)
     rotated_image(mark_rect).copyTo(mark_image);
 
 #ifdef IMAGE_DEBUG
-    // imshow("rotated_image", rotated_image);
-    imshow("mark_image", mark_image);
+    try
+    {
+        // imshow("rotated_image", rotated_image);
+        imshow("mark_image", mark_image);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 #endif /* IMAGE_DEBUG */
     result_.angle_image = rotated_mat.clone();
     return true;
@@ -329,7 +354,7 @@ void RoadDetector::showResult(cv::Mat image)
         }
         catch(const std::exception& e)
         {
-            std::cerr << "Roade_result: " << e.what() << '\n';
+            std::cerr << e.what() << '\n';
         }
     }
 }

@@ -31,6 +31,7 @@ void QRCodeDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
             const_cast<unsigned char *>(msg->data.data()), msg->step);
   
+  // get image size
   if (first_image)
   {
     image_width_ = msg->width;
@@ -44,6 +45,7 @@ void QRCodeDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 
 void QRCodeDetector::process(Mat image)
 {
+  // get image size
   static bool first_image = true;
   if (first_image)
   {
@@ -51,6 +53,7 @@ void QRCodeDetector::process(Mat image)
     image_height_ = image.rows;
     first_image = false;
   }
+
   int detector_result = detector(image);
   if (detector_result != 0)
     publishResult();
@@ -81,6 +84,7 @@ int QRCodeDetector::detector(Mat image)
 
   Image::SymbolIterator symbol_iter = image_zbar.symbol_begin();
 
+  // get result
   for (; symbol_iter != image_zbar.symbol_end(); ++symbol_iter)
   {
     detector_result = 1;
@@ -104,10 +108,6 @@ bool QRCodeDetector::newImage()
     new_image_ = false;
     return true;
   }
-  else
-  {
-    return false;
-  }
   
   return new_image_;
 }
@@ -120,6 +120,7 @@ void QRCodeDetector::showResult(Mat image)
   std::list<QRCodeInfo>::iterator list_iter = qrcode_info_list_.begin();
   for (; list_iter != qrcode_info_list_.end(); ++list_iter)
   {
+    // draw result
     rectangle(result_image, list_iter->vertex_position[0], list_iter->vertex_position[2], Scalar(0,255,0), 1);
   }
 
