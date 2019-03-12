@@ -15,10 +15,10 @@ public:
   void stop();
 
   double elapsed();
-  double show();
 
+  void show();
   void sleep(double ms);
-  double wait(double ms);
+  void wait(double ms);
 private:
   std::chrono::time_point<std::chrono::high_resolution_clock> m_begin;
   std::chrono::time_point<std::chrono::high_resolution_clock> m_end;
@@ -39,7 +39,7 @@ double Timer::elapsed()
   return (std::chrono::duration_cast<std::chrono::duration<double>>(m_end - m_begin)).count()*1000;
 }
 
-double Timer::show() 
+void Timer::show() 
 {
   std::cout << "Time elapsed: " << elapsed() << " ms" << std::endl;
 }
@@ -49,7 +49,7 @@ void Timer::sleep(double ms)
   std::this_thread::sleep_for(std::chrono::duration<double>(ms/1000));
 }
 
-double Timer::wait(double ms)
+void Timer::wait(double ms)
 {
   stop(); sleep(ms - elapsed()); stop();
 }
