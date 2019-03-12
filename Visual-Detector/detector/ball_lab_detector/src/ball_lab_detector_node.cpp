@@ -1,6 +1,7 @@
 #include <opencv2/highgui.hpp>
 
 #include "ball_lab_detector/ball_lab_detector.h"
+#include "timer/timer.hpp"
 
 using namespace cv;
 
@@ -18,13 +19,17 @@ int main(int argc, char ** argv)
 	}
   
   Mat image;
+  Timer timer;
   auto ball_lab_detector = std::make_shared<detector_module::BallLabDetector>();
   ball_lab_detector->setShowResult(true);
   while(rclcpp::ok())
   {
     cap>>image;
     rclcpp::spin_some(ball_lab_detector);
+    timer.reset();
     ball_lab_detector->process(image);
+    timer.stop();
+    timer.show();
     loop_rate.sleep();
   }
   

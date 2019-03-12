@@ -10,7 +10,7 @@ BallLabDetector::BallLabDetector()
     : new_image_(false),
       Node("ball_lab_detector"),
       show_result_(false),
-      ball_color_(READ),
+      ball_color_(RED),
       min_area_(200.0)
 {
     /* sublisher */
@@ -151,7 +151,7 @@ int BallLabDetector::detector(cv::Mat image)
         }
     }
 
-    printf ("max_area: %f\n", max_area);
+    // printf ("max_area: %f\n", max_area);
     Rect max_rect = boundingRect(max_contour);
 
 #ifdef IMAGE_DEBUG
