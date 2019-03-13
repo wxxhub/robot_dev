@@ -30,10 +30,15 @@ sudo apt install ros-$ROS_DISTRO-rmw-connext-cpp # for RTI Connext (requires lic
 #Install additional packages using ROS 1 packages
 sudo apt update
 sudo apt install ros-$ROS_DISTRO-ros1-bridge
+
 ````
 
 #### 编译工具colcon  
 [colcon](colcon.md)  
 
 #### yaml-cpp  
-> ```` sudo apt-get install libyaml-cpp-dev ````    
+> ```` sudo apt-get install libyaml-cpp-dev ````     
+
+#### 二维绘制工具rqt
+> ````sudo apt-get install ros-$ROS_DISTRO-rqt* ````  
+> 使用 **ros2 run rqt_gui rqt_gui**  
