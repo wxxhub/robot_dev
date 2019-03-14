@@ -25,6 +25,7 @@ find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(ball_detector_msgs REQUIRED)
+find_package(timer REQUIRED)
 
 add_library(ball_lab_detector src/ball_lab_detector.cpp)
 target_include_directories(ball_lab_detector PUBLIC
@@ -39,6 +40,7 @@ ament_target_dependencies(
   "Boost"
   "yaml-cpp"
   "ball_detector_msgs"
+  "timer"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,
