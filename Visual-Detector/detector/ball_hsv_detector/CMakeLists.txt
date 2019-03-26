@@ -27,6 +27,22 @@ find_package(yaml-cpp REQUIRED)
 find_package(ball_detector_msgs REQUIRED)
 find_package(timer REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+find_path(YAML_CPP_INCLUDE_DIR
+  NAMES yaml_cpp.h
+  PATHS ${YAML_CPP_INCLUDE_DIRS}
+)
+find_library(YAML_CPP_LIBRARY
+  NAMES YAML_CPP
+  PATHS ${YAML_CPP_LIBRARY_DIRS}
+)
+link_directories(${YAML_CPP_LIBRARY_DIRS})
+
+if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
+add_definitions(-DHAVE_NEW_YAMLCPP)
+endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 
 add_library(ball_hsv_detector src/ball_hsv_detector.cpp)
 target_include_directories(ball_hsv_detector PUBLIC
@@ -45,9 +61,14 @@ ament_target_dependencies(
   "ament_index_cpp"
 )
 
+
+#generate_dynamic_reconfigure_options(
+#)
+
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(ball_hsv_detector PRIVATE "BALL_LAB_DETECTOR_BUILDING_LIBRARY")
+target_link_libraries(ball_hsv_detector yaml-cpp)
 
 install(
   DIRECTORY include/
@@ -90,6 +111,12 @@ ament_export_interfaces(
 )
 ament_export_libraries(
   ball_hsv_detector
+)
+
+# Install config files.
+install(DIRECTORY
+  config
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 ament_package()

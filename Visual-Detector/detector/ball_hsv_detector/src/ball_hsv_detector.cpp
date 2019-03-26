@@ -11,20 +11,30 @@ BallHsvDetector::BallHsvDetector()
       Node("ball_hsv_detector"),
       show_result_(false),
       ball_color_(RED),
-      min_area_(200.0)
+      min_area_(200.0),
+	  ball_x_(0),
+	  ball_y_(0)
 {
     /* sublisher */
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&BallHsvDetector::imageCallback, this, std::placeholders::_1));
 
     /* publisger */
     result_pub_ = this->create_publisher<ball_detector_msgs::msg::BallDetector>("/ball_hsv_detector/result");
-    string package_share_directory = ament_index_cpp::get_package_share_directory("ball_hsv_detector");
-    cout<<"package_share_directory test: "<<package_share_directory<<endl;
+
+    try
+    {
+      default_setting_path_ = ament_index_cpp::get_package_share_directory("ball_hsv_detector") + "/config/ball_detector_params.yaml";
+		  resetParameter();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 BallHsvDetector::~BallHsvDetector()
 {
-
+	
 }
 
 void BallHsvDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
@@ -45,7 +55,7 @@ void BallHsvDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg
     new_image_ = true;
 }
 
-void BallHsvDetector::process(cv::Mat image)
+void BallHsvDetector::process(Mat image)
 {
     static bool first_image = true;
     if (first_image)
@@ -56,7 +66,7 @@ void BallHsvDetector::process(cv::Mat image)
     }
     input_image_ = image.clone();
 
-    int detector_result = detector(image);
+    int detector_result = detector(input_image_);
     if (detector_result != 0)
         publishResult();
 
@@ -72,10 +82,56 @@ void BallHsvDetector::process()
     showResult(input_image_);
 }
 
-int BallHsvDetector::detector(cv::Mat image)
+int BallHsvDetector::detector(Mat image)
 {
+	Mat detect_image = image.clone();
+	Mat hsv_image, filtered_image;
+	cvtColor(detect_image,  hsv_image, COLOR_RGB2HSV);
 
+	inRangeHsv(hsv_image, hsv_filter1_, filtered_image);
+
+#ifdef IMAGE_DEBUG
+    try
+    {
+		imshow("hsv_image", hsv_image);
+        imshow("filtered_image", filtered_image);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+#endif
     return 0;
+}
+
+void BallHsvDetector::inRangeHsv(const Mat &input_img, const HsvFilter &filter_value, Mat &output_img)
+{
+  // 0-360 -> 0-180
+  int scaled_hue_min = static_cast<int>(filter_value.h_min * 0.5);
+  int scaled_hue_max = static_cast<int>(filter_value.h_max * 0.5);
+
+  if (scaled_hue_min <= scaled_hue_max)
+  {
+    Scalar min_value = Scalar(scaled_hue_min, filter_value.s_min, filter_value.v_min, 0);
+    Scalar max_value = Scalar(scaled_hue_max, filter_value.s_max, filter_value.v_max, 0);
+
+    inRange(input_img, min_value, max_value, output_img);
+  }
+  else
+  {
+    Mat lower_hue_range, upper_hue_range;
+    Scalar min_value, max_value;
+
+    min_value = Scalar(0, filter_value.s_min, filter_value.v_min, 0);
+    max_value = Scalar(scaled_hue_max, filter_value.s_max, filter_value.v_max, 0);
+    inRange(input_img, min_value, max_value, lower_hue_range);
+
+    min_value = Scalar(scaled_hue_min, filter_value.s_min, filter_value.v_min, 0);
+    max_value = Scalar(179, filter_value.s_max, filter_value.v_max, 0);
+    inRange(input_img, min_value, max_value, upper_hue_range);
+
+    bitwise_or(lower_hue_range, upper_hue_range, output_img);
+  }
 }
 
 bool BallHsvDetector::newImage()
@@ -91,12 +147,20 @@ bool BallHsvDetector::newImage()
 
 void BallHsvDetector::resetParameter()
 {
-//   YAML::Node doc;
+	YAML::Node doc;
 
-//   try
-//   {
-//     // load yaml
-//     doc = YAML::LoadFile(default_setting_path_.c_str());
+	try
+	{
+		// load yaml
+		doc = YAML::LoadFile(default_setting_path_.c_str());
+
+		hsv_filter1_.h_min = doc["filter_h_min"].as<int>();
+		hsv_filter1_.h_max = doc["filter_h_max"].as<int>();
+		hsv_filter1_.s_min = doc["filter_s_min"].as<int>();
+		hsv_filter1_.s_max = doc["filter_s_max"].as<int>();
+		hsv_filter1_.v_min = doc["filter_v_min"].as<int>();
+		hsv_filter1_.v_max = doc["filter_v_max"].as<int>();
+		hsv_filter1_.print();
 
 //     // parse
 //     params_config_.gaussian_blur_size = doc["gaussian_blur_size"].as<int>();
@@ -133,22 +197,23 @@ void BallHsvDetector::resetParameter()
 //     saveConfig();
 
 //     publishParam();
-//   } catch (const std::exception& e)
-//   {
-//     ROS_ERROR_STREAM("Failed to Get default parameters : " << default_setting_path_);
-//     return;
-//   }
+	} catch (const std::exception& e)
+	{
+		RCLCPP_ERROR(this->get_logger(), "Failed to open config file: %s", default_setting_path_);
+		return;
+	}
 }
 
-void BallHsvDetector::showResult(cv::Mat image)
+void BallHsvDetector::showResult(Mat image)
 {
     if (!show_result_)
         return;
     
     try
     {
-        circle(image, Point(ball_x_, ball_y_), ball_radius_, Scalar(0, 255, 0), 2);
+        // circle(image, Point(ball_x_, ball_y_), ball_radius_, Scalar(0, 255, 0), 2);
         imshow("result_image", image);
+		cvWaitKey(1);
     }
     catch(const std::exception& e)
     {

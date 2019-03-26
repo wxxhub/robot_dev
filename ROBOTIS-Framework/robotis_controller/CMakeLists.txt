@@ -70,6 +70,7 @@ ament_target_dependencies(
   "PkgConfig"
 )
 
+target_link_libraries(${PROJECT_NAME} yaml-cpp)
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(robotis_controller PRIVATE "ROBOTIS_CONTROLLER_BUILDING_LIBRARY")

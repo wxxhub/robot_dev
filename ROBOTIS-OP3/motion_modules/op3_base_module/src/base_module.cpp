@@ -13,15 +13,15 @@ namespace robotis_op
 
 BaseModule::BaseModule()
 	: control_cycle_msec_(0),
-		has_goal_joints_(false),
+		has_goal_joints_(true),
     ini_pose_only_(false),
     init_pose_file_path_("")
 {
-	enable_ = false;
+	enable_ = true;
 	module_name_ = "base_module";
   control_mode_ = robotis_framework::PositionControl;
+  module_node_ = rclcpp::Node::make_shared(module_name_);
 
-	std::cout<<"base module name: "<<module_name_<<std::endl;
   base_module_state_ = new BaseModuleState();
   joint_state_ = new BaseJointState();
 }
@@ -38,7 +38,6 @@ void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
 	getcwd(buffer, 80);
 	std::cout << "base module run path" << buffer << std::endl;
 	control_cycle_msec_ = control_cycle_msec;
-  queue_thread_ = boost::thread(boost::bind(&BaseModule::queueThread, this));
 
 	for (std::map<std::string, robotis_framework::Dynamixel*>::iterator it = robot->dxls_.begin();
        it != robot->dxls_.end(); it++)
@@ -51,33 +50,38 @@ void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
     result_[joint_name]->goal_position_ = dxl_info->dxl_state_->goal_position_;
   }
 
-	module_node_->get_parameter_or("init_file_path", init_pose_file_path_, INIT_PATH);
+  init_pose_file_path_ = ament_index_cpp::get_package_share_directory("op3_base_module") + "/data/ini_pose.yaml";
 	std::cout<<"init_pose_file_path_: "<<init_pose_file_path_<<std::endl;
 
 	/* publish topics */
   status_msg_pub_ = module_node_->create_publisher<robotis_controller_msgs::msg::StatusMsg>("/robotis/status");
   set_ctrl_module_pub_ = module_node_->create_publisher<std_msgs::msg::String>("/robotis/enable_ctrl_module");
+  set_module_client_ = module_node_->create_client<robotis_controller_msgs::srv::SetModule>("/robotis/load_offset");
+
+  queue_thread_ = boost::thread(boost::bind(&BaseModule::queueThread, this));
 }
 
 void BaseModule::queueThread()
 {
 	auto ini_pose_msg_sub = module_node_->create_subscription<std_msgs::msg::String>("/robotis/base/ini_pose", std::bind(&BaseModule::initPoseMsgCallback, this, std::placeholders::_1));
-	set_module_client_ = module_node_->create_client<robotis_controller_msgs::srv::SetModule>("/robotis/load_offset");
 	// node->create_client<TestService>("test");
 
-	rclcpp::WallRate loop_rate(control_cycle_msec_);
+	rclcpp::WallRate loop_rate(1000.0/control_cycle_msec_);
+  // rclcpp::WallRate loop_rate(60);
 	while (rclcpp::ok())
 	{
     rclcpp::spin_some(module_node_);
+    // std::cout<<"spin_some ..."<<std::endl;
 		loop_rate.sleep();
 	}
 }
 
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
+  printf("base module prcessing...\n");
   if (enable_ == false)
     return;
-
+  printf("base module prcessing2...\n");
   /*----- write curr position -----*/
   std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter;
   for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
@@ -117,7 +121,9 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
   for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     std::string joint_name = state_iter->first;
-    result_[joint_name]->goal_position_ = joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_;
+    printf("%s goal_position: %d\n", joint_name.c_str(), joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_);
+    // result_[joint_name]->goal_position_ = joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_;
+    result_[joint_name]->goal_position_ = 0;
   } 
 
   /*---------- initialize count number ----------*/
@@ -161,6 +167,7 @@ void BaseModule::onModuleDisable()
 
 void BaseModule::initPoseMsgCallback(const std_msgs::msg::String::SharedPtr msg)
 {
+  printf("### init\n");
 	if (base_module_state_->is_moving_ == false)
   {
     if (msg->data == "ini_pose")
@@ -182,13 +189,15 @@ void BaseModule::initPoseMsgCallback(const std_msgs::msg::String::SharedPtr msg)
   else
     RCLCPP_INFO(module_node_->get_logger(), "previous task is alive");
 
-  return;
+  // return;
 }
 
 void BaseModule::initPoseTrajGenerateProc()
 {
+  printf("initPoseTrajGenerateProc\n");
   for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
+    // printf("id:%d \n", id);
     double ini_value = joint_state_->goal_joint_state_[id].position_;
     double tar_value = base_module_state_->joint_ini_pose_.coeff(id, 0);
 
@@ -315,22 +324,23 @@ void BaseModule::setCtrlModule(std::string module)
 
 void BaseModule::callServiceSettingModule(const std::string &module_name)
 {
-  auto set_module_srv = std::make_shared<robotis_controller_msgs::srv::SetModule::Request>();
-  set_module_srv->module_name = module_name;
+  // auto set_module_srv = std::make_shared<robotis_controller_msgs::srv::SetModule::Request>();
+  // set_module_srv->module_name = module_name;
 
-  auto result_future = set_module_client_->async_send_request(set_module_srv);
-  if (rclcpp::spin_until_future_complete(module_node_, result_future) != 
-        rclcpp::executor::FutureReturnCode::SUCCESS)
-  {
-    RCLCPP_ERROR(module_node_->get_logger(), "Failed to set module");
-    return;
-  }
+  // auto result_future = set_module_client_->async_send_request(set_module_srv);
+  // if (rclcpp::spin_until_future_complete(module_node_, result_future) != 
+  //       rclcpp::executor::FutureReturnCode::SUCCESS)
+  // {
+  //   RCLCPP_ERROR(module_node_->get_logger(), "Failed to set module");
+  //   return;
+  // }
 
   return ;
 }
 
 void BaseModule::parseInitPoseData(const std::string &path)
 {
+  printf("parseInitPoseData\n");
   YAML::Node doc;
   try
   {
@@ -342,6 +352,7 @@ void BaseModule::parseInitPoseData(const std::string &path)
     return;
   }
 
+  // printf("test1\n");
   // parse movement time
   double mov_time;
   mov_time = doc["mov_time"].as<double>();
@@ -354,6 +365,7 @@ void BaseModule::parseInitPoseData(const std::string &path)
 
   base_module_state_->via_num_ = via_num;
 
+  // printf("test1\n");
   // parse via-point time
   std::vector<double> via_time;
   via_time = doc["via_time"].as<std::vector<double> >();
@@ -375,6 +387,7 @@ void BaseModule::parseInitPoseData(const std::string &path)
   for (YAML::iterator yaml_it = via_pose_node.begin(); yaml_it != via_pose_node.end(); ++yaml_it)
   {
     int id;
+    // printf("test3\n");
     std::vector<double> value;
 
     id = yaml_it->first.as<int>();
@@ -391,6 +404,7 @@ void BaseModule::parseInitPoseData(const std::string &path)
     int id;
     double value;
 
+    // printf("test4\n");
     id = yaml_it->first.as<int>();
     value = yaml_it->second.as<double>();
 

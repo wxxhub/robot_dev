@@ -26,8 +26,8 @@ using namespace std::chrono_literals;
 
 rclcpp::Node::SharedPtr manager_node = nullptr;
 
-const int BAUD_RATE = 2000000;
-const double PROTOCOL_VERSION = 2.0;
+const int BAUD_RATE = 1000000;
+const double PROTOCOL_VERSION = 1.0;
 const int SUB_CONTROLLER_ID = 200;
 const int DXL_BROADCAST_ID = 254;
 const int DEFAULT_DXL_ID = 1;
@@ -78,6 +78,7 @@ int main(int argc, char ** argv)
   manager_node->get_parameter_or("baud_rate", g_baudrate, BAUD_RATE);
   manager_node->get_parameter_or("gazebo", controller->gazebo_mode_, false);
   std::cout<<"g_device_name: "<<g_device_name<<std::endl;
+  std::cout<<"BAUD_RATE: "<<BAUD_RATE<<std::endl;
   // printf("g_device_name:%s\n", g_device_name);
 
   /* ros2 message */
@@ -87,7 +88,6 @@ int main(int argc, char ** argv)
   g_init_pose_pub = manager_node->create_publisher<std_msgs::msg::String>("/robotis/base/ini_pose");
   g_is_simulation = controller->gazebo_mode_;
 
-/*
   if (g_is_simulation == false)
   {
     PortHandler *port_handler;
@@ -123,7 +123,7 @@ int main(int argc, char ** argv)
             RCLCPP_ERROR(manager_node->get_logger(),"please reset DEVICE_NUMBER");
             break;
         }
-        usleep(10);
+        usleep(1000);
       }
 
       if (set_port_times > 1000)
@@ -180,7 +180,7 @@ int main(int argc, char ** argv)
     RCLCPP_ERROR(manager_node->get_logger(), "NO robot file path in the ROS parameters.");
     return -1;
   }
- */
+
   // initialize robot
   RCLCPP_INFO(manager_node->get_logger(), "initialize robot");
   if (controller->initialize(g_robot_file, g_init_file) == false)
@@ -190,10 +190,10 @@ int main(int argc, char ** argv)
   }
 
   // load offset
-//   RCLCPP_INFO(manager_node->get_logger(), "load offset");
-//   if (g_offset_file != "")
-//     controller->loadOffset(g_offset_file);
-//   usleep(300 * 1000);
+  RCLCPP_INFO(manager_node->get_logger(), "load offset");
+  if (g_offset_file != "")
+    controller->loadOffset(g_offset_file);
+  usleep(300 * 1000);
   
 //  RCLCPP_INFO(manager_node->get_logger(), "start add module");
 
@@ -202,7 +202,7 @@ int main(int argc, char ** argv)
 
   /* Add Motion Module */
   // controller->addMotionModule((MotionModule*) ActionModule::getInstance());
-  // controller->addMotionModule((MotionModule*) BaseModule::getInstance());
+  controller->addMotionModule((MotionModule*) BaseModule::getInstance());
   // controller->addMotionModule((MotionModule*) HeadControlModule::getInstance());
   // controller->addMotionModule((MotionModule*) WalkingModule::getInstance());
   // controller->addMotionModule((MotionModule*) DirectControlModule::getInstance());
@@ -212,7 +212,7 @@ int main(int argc, char ** argv)
 
   RCLCPP_INFO(manager_node->get_logger(), "finished add module");
 
-  // controller->startTimer();
+  controller->startTimer();
 
   usleep(100 * 1000);
 
@@ -223,7 +223,7 @@ int main(int argc, char ** argv)
   g_init_pose_pub->publish(init_msg);
   RCLCPP_INFO(manager_node->get_logger(), "Go to init pose");
 
-  rclcpp::WallRate loop_rate(1ms);
+  rclcpp::WallRate loop_rate(60);
   while (rclcpp::ok())
   {
     rclcpp::spin_some(manager_node);

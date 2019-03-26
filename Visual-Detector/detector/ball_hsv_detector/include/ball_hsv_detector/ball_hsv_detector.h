@@ -3,6 +3,12 @@
 #include <opencv2/highgui.hpp>
 // #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
+
+#include <yaml-cpp/yaml.h>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+// may throw PackageNotFoundError exception
+
 // #include <boost/thread.hpp>
 #include "rclcpp/rclcpp.hpp"
 
@@ -11,11 +17,12 @@
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "ball_detector_msgs/msg/ball_detector.hpp"
-#include <ament_index_cpp/get_package_share_directory.hpp>
-// may throw PackageNotFoundError exception
+#include "ball_hsv_detector/ball_detector_config.h"
 
 namespace detector_module
 {
+
+
 
 enum Color
 {
@@ -34,6 +41,7 @@ public:
   void process();
 
   int detector(cv::Mat image);
+  void inRangeHsv(const cv::Mat &input_img, const HsvFilter &filter_value, cv::Mat &output_img);
 
   bool newImage();
   void showResult(cv::Mat image);
@@ -57,6 +65,10 @@ private:
   int ball_x_;
   int ball_y_;
   int ball_radius_;
+
+  HsvFilter hsv_filter1_;
+
+  std::string default_setting_path_;
 
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;

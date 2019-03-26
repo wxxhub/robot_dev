@@ -14,11 +14,14 @@ RoadDetector::RoadDetector()
       mark_detector_(true),
       wite_background_(true),
       mark_rect_width_(120),
-      half_mark_rect_width_(mark_rect_width_/2)
+      half_mark_rect_width_(mark_rect_width_/2),
+      enable_(false)
 {
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
 
     result_pub_ = this->create_publisher<road_detector_msgs::msg::RoadResult>("/road_detector/result");
+
+    auto enable_server = this->create_service<std_srvs::srv::SetBool>("/road_detector/enable", std::bind(&RoadDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 RoadDetector::~RoadDetector()
@@ -44,8 +47,19 @@ void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
     new_image_ = true;
 }
 
+void RoadDetector::enableServer(const std::shared_ptr<rmw_request_id_t> request_header,
+                                const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                const std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+{
+    enable_ = request->data;
+    response->success = true;
+}
+
 void RoadDetector::process()
 {
+    if (!enable_)
+        return;
+
     detector(input_image_);
     publishResult();
     showResult(input_image_);
@@ -53,6 +67,9 @@ void RoadDetector::process()
 
 void RoadDetector::process(Mat image)
 {
+    if (!enable_)
+        return;
+
     static bool first_image = true;
     if (first_image)
     {

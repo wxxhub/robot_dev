@@ -21,7 +21,7 @@ RobotisController::RobotisController()
 
 bool RobotisController::initialize(const std::string robot_file_path, const std::string init_file_path)
 {
-//   std::string dev_desc_dir_path = ros::package::getPath("robotis_device") + "/devices";
+  // std::string dev_desc_dir_path = ros::package::getPath("robotis_device") + "/devices";
 
   RCLCPP_INFO(robot_node_->get_logger(), "robot init");
   std::string dev_desc_dir_path;
@@ -1145,6 +1145,7 @@ void *RobotisController::timerThread(void *param)
 
 void RobotisController::startTimer()
 {
+  printf("robot startTimer1\n");
   if (this->is_timer_running_ == true)
     return;
 
@@ -1156,7 +1157,6 @@ void RobotisController::startTimer()
   }
   else
   {
-    printf("robot init\n");
     initializeSyncWrite();
 
     for (auto& it : port_to_bulk_read_)
@@ -1186,7 +1186,7 @@ void RobotisController::startTimer()
       RCLCPP_ERROR(robot_node_->get_logger(),"pthread_attr_setschedparam error = %d\n", error);
 
     // create and start the thread
-    if ((error = pthread_create(&this->timer_thread_, &attr, this->timerThread, this)) != 0)
+    if ((error = pthread_create(&this->timer_thread_, NULL, this->timerThread, this)) != 0)
     {
       RCLCPP_ERROR(robot_node_->get_logger(),"Creating timer thread failed!!");
       exit(-1);
@@ -1674,17 +1674,20 @@ void RobotisController::process()
           Dynamixel      *dxl         = dxl_it.second;
           DynamixelState *dxl_state   = dxl_it.second->dxl_state_;
 
+          printf("port_to_sync_write_position_1\n");
+          printf("dxl->ctrl_module_name_: %s    (*module_it)->getModuleName(): %s\n",dxl->ctrl_module_name_.c_str(), (*module_it)->getModuleName().c_str());
           if (dxl->ctrl_module_name_ == (*module_it)->getModuleName())
           {
             //do_sync_write = true;
             DynamixelState *result_state = (*module_it)->result_[joint_name];
 
+            printf("port_to_sync_write_position_2\n");
             if (result_state == NULL)
             {
               RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
               continue;
             }
-
+            printf("port_to_sync_write_position_3\n");
             // TODO: check update time stamp ?
 
             if ((*module_it)->getControlMode() == PositionControl)
@@ -1705,6 +1708,8 @@ void RobotisController::process()
                 sync_write_data[1] = DXL_HIBYTE(DXL_LOWORD(pos_data));
                 sync_write_data[2] = DXL_LOBYTE(DXL_HIWORD(pos_data));
                 sync_write_data[3] = DXL_HIBYTE(DXL_HIWORD(pos_data));
+
+                printf("port_to_sync_write_position_\n");
 
                 if (port_to_sync_write_position_[dxl->port_name_] != NULL)
                   port_to_sync_write_position_[dxl->port_name_]->changeParam(dxl->id_, sync_write_data);
@@ -1966,8 +1971,8 @@ void RobotisController::addMotionModule(MotionModule *module)
       return;
     }
   }
-  // module->initialize(robot_->getControlCycle(), robot_);
-  module->initialize(8, robot_);
+  module->initialize(robot_->getControlCycle(), robot_);
+  // module->initialize(8, robot_);
   // std::cout << "add module4" << std::endl;
   motion_modules_.push_back(module);
   motion_modules_.unique();

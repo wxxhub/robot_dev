@@ -29,7 +29,7 @@ int main(int argc, char ** argv)
     timer.reset();
     ball_hsv_detector->process(image);
     timer.stop();
-    timer.show();
+    // timer.show();
     loop_rate.sleep();
   }
   

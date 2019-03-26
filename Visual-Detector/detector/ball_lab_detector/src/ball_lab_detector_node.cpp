@@ -10,7 +10,7 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
 
   VideoCapture cap(0);
-  rclcpp::WallRate loop_rate(30);
+  rclcpp::WallRate loop_rate(125);
 
   if(!cap.isOpened())
 	{
@@ -26,11 +26,20 @@ int main(int argc, char ** argv)
   {
     cap>>image;
     rclcpp::spin_some(ball_lab_detector);
+  #ifdef DEBUG_TIME
     timer.reset();
+  #endif
     ball_lab_detector->process(image);
+  #ifdef DEBUG_TIME
     timer.stop();
     timer.show();
+    timer.reset();
+  #endif
     loop_rate.sleep();
+  #ifdef DEBUG_TIME
+    timer.stop();
+    printf("sleep time: %fms\n", timer.elapsed());
+  #endif
   }
   
   return 0;

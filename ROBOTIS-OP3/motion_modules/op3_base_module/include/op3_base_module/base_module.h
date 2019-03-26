@@ -10,6 +10,7 @@
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 #include "robotis_controller_msgs/msg/joint_ctrl_module.hpp"
 #include "robotis_controller_msgs/msg/status_msg.hpp"

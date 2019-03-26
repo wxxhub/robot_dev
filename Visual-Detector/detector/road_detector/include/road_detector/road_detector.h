@@ -10,6 +10,7 @@
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include "road_detector_msgs/msg/road_result.hpp"
 
 namespace detector_module
@@ -67,12 +68,12 @@ private:
 
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
-
   rclcpp::Publisher<road_detector_msgs::msg::RoadResult>::SharedPtr result_pub_;
   
   bool new_image_;
   bool show_result_;
   bool mark_detector_;
+  bool enable_;
   const Color road_color;
   const bool wite_background_;
 
@@ -86,6 +87,9 @@ private:
 
   // ros2
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
+  void enableServer(const std::shared_ptr<rmw_request_id_t> request_header,
+                    const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                    const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
   void publishResult();
 
 };
