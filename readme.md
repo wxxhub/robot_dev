@@ -9,6 +9,14 @@
 > ROS2-bouncy版本，launch无法实现传参      
 > 而ROS2-crystal，没有ament,可以使用[colcon](Explain/colcon.md), 测试可以使用，需要改写部分配置  
 
+#### 部署
+```
+mkdir robot_dev
+cd robot_dev
+git clone **http-address8** src
+colcon build --symlink-install
+```
+
 #### Install
 > 在install中安装文件夹，比如安装launch 文件夹  
 > **Install launch files.**
