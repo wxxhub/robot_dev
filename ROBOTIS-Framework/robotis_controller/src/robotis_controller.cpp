@@ -1646,6 +1646,50 @@ void RobotisController::process()
     }
   }
 
+#ifdef OPEN_REGULATOR_MODULES
+  // add regulator modules
+  if (regulator_modules_.size() > 0)
+  {
+    queue_mutex_.lock();
+    for (auto module_it = regulator_modules_.begin(); module_it != regulator_modules_.end(); module_it++)
+    {
+      // if ((*module_it)->getModuleEnable() == false)
+      //   continue;  
+
+      (*module_it)->process(robot_->dxls_, sensor_result_);
+
+      for (auto& dxl_it : robot_->dxls_)
+      {
+        std::string     joint_name  = dxl_it.first;
+        Dynamixel      *dxl         = dxl_it.second;
+        DynamixelState *dxl_state   = dxl_it.second->dxl_state_;
+
+        DynamixelState *result_state = (*module_it)->result_[joint_name];
+
+        if (result_state == NULL)
+        {
+          RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
+          continue;
+        }
+
+        dxl_state->goal_torque_ = result_state->goal_torque_;
+
+        if (gazebo_mode_ == false)
+        {
+          uint32_t curr_data = dxl->convertTorque2Value(dxl_state->goal_torque_);
+          uint8_t sync_write_data[2] = { 0 };
+          sync_write_data[0] = DXL_LOBYTE(curr_data);
+          sync_write_data[1] = DXL_HIBYTE(curr_data);
+
+          if (port_to_sync_write_current_[dxl->port_name_] != NULL)
+            port_to_sync_write_current_[dxl->port_name_]->changeParam(dxl->id_, sync_write_data);
+        }
+      }
+    }
+    queue_mutex_.unlock();
+  }
+#endif /* OPEN_REGULATOR_MODULES */
+
   if (DEBUG_PRINT)
   {
     time_duration = ros_clock.now() - start_time;
@@ -1844,50 +1888,6 @@ void RobotisController::process()
       fprintf(stderr, "(%2.6f) MotionModule Process() & save result \n", time_duration.nanoseconds() * 0.000001);
     }
   }
-
-#ifdef OPEN_REGULATOR_MODULES
-  // add regulator modules
-  if (regulator_modules_.size() > 0)
-  {
-    queue_mutex_.lock();
-    for (auto module_it = regulator_modules_.begin(); module_it != regulator_modules_.end(); module_it++)
-    {
-      // if ((*module_it)->getModuleEnable() == false)
-      //   continue;  
-
-      (*module_it)->process(robot_->dxls_, sensor_result_);
-
-      for (auto& dxl_it : robot_->dxls_)
-      {
-        std::string     joint_name  = dxl_it.first;
-        Dynamixel      *dxl         = dxl_it.second;
-        DynamixelState *dxl_state   = dxl_it.second->dxl_state_;
-
-        DynamixelState *result_state = (*module_it)->result_[joint_name];
-
-        if (result_state == NULL)
-        {
-          RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
-          continue;
-        }
-
-        dxl_state->goal_torque_ = result_state->goal_torque_;
-
-        if (gazebo_mode_ == false)
-        {
-          uint32_t curr_data = dxl->convertTorque2Value(dxl_state->goal_torque_);
-          uint8_t sync_write_data[2] = { 0 };
-          sync_write_data[0] = DXL_LOBYTE(curr_data);
-          sync_write_data[1] = DXL_HIBYTE(curr_data);
-
-          if (port_to_sync_write_current_[dxl->port_name_] != NULL)
-            port_to_sync_write_current_[dxl->port_name_]->changeParam(dxl->id_, sync_write_data);
-        }
-      }
-    }
-    queue_mutex_.unlock();
-  }
-#endif /* OPEN_REGULATOR_MODULES */
 
   if (DEBUG_PRINT)
   {

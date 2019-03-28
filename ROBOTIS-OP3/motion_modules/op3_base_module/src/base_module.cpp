@@ -78,10 +78,9 @@ void BaseModule::queueThread()
 
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
-  printf("base module prcessing...\n");
   if (enable_ == false)
     return;
-  printf("base module prcessing2...\n");
+  printf("base module prcessing...\n");
   /*----- write curr position -----*/
   std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter;
   for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
