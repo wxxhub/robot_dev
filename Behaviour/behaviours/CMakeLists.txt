@@ -26,7 +26,7 @@ find_package(op3_walking_module_msgs REQUIRED)
 find_package(op3_action_module_msgs REQUIRED)
 find_package(robotis_math REQUIRED)
 
-add_library(behaviours src/behaviour_demo.cpp)
+add_library(behaviours src/behaviour_demo/behaviour_demo.cpp)
 
 target_include_directories(behaviours PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
