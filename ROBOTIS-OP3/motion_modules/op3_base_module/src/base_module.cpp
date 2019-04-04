@@ -80,7 +80,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 {
   if (enable_ == false)
     return;
-  printf("base module prcessing...\n");
+  // printf("base module prcessing...\n");
   /*----- write curr position -----*/
   std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter;
   for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
@@ -120,7 +120,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
   for (state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     std::string joint_name = state_iter->first;
-    printf("%s goal_position: %d\n", joint_name.c_str(), joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_);
+    // printf("%s goal_position: %d\n", joint_name.c_str(), joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_);
     // result_[joint_name]->goal_position_ = joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_;
     result_[joint_name]->goal_position_ = 0;
   } 
@@ -193,10 +193,8 @@ void BaseModule::initPoseMsgCallback(const std_msgs::msg::String::SharedPtr msg)
 
 void BaseModule::initPoseTrajGenerateProc()
 {
-  printf("initPoseTrajGenerateProc\n");
   for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
-    // printf("id:%d \n", id);
     double ini_value = joint_state_->goal_joint_state_[id].position_;
     double tar_value = base_module_state_->joint_ini_pose_.coeff(id, 0);
 

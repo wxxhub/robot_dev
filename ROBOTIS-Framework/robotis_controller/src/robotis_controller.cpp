@@ -1656,7 +1656,7 @@ void RobotisController::process()
       // if ((*module_it)->getModuleEnable() == false)
       //   continue;  
 
-      (*module_it)->process(robot_->dxls_, sensor_result_);
+      (*module_it)->process(robot_->dxls_, sensor_result_, port_to_bulk_read_);
 
       for (auto& dxl_it : robot_->dxls_)
       {
@@ -1668,7 +1668,7 @@ void RobotisController::process()
 
         if (result_state == NULL)
         {
-          RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
+          // RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
           continue;
         }
 
@@ -1718,20 +1718,16 @@ void RobotisController::process()
           Dynamixel      *dxl         = dxl_it.second;
           DynamixelState *dxl_state   = dxl_it.second->dxl_state_;
 
-          printf("port_to_sync_write_position_1\n");
-          printf("dxl->ctrl_module_name_: %s    (*module_it)->getModuleName(): %s\n",dxl->ctrl_module_name_.c_str(), (*module_it)->getModuleName().c_str());
           if (dxl->ctrl_module_name_ == (*module_it)->getModuleName())
           {
             //do_sync_write = true;
             DynamixelState *result_state = (*module_it)->result_[joint_name];
 
-            printf("port_to_sync_write_position_2\n");
             if (result_state == NULL)
             {
-              RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
+              // RCLCPP_ERROR(robot_node_->get_logger(), "[%s] %s ", (*module_it)->getModuleName().c_str(), joint_name.c_str());
               continue;
             }
-            printf("port_to_sync_write_position_3\n");
             // TODO: check update time stamp ?
 
             if ((*module_it)->getControlMode() == PositionControl)

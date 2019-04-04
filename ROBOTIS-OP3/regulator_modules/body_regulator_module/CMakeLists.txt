@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(hand_regulator_module)
+project(body_regulator_module)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -28,12 +28,12 @@ find_package(robotis_math REQUIRED)
 find_package(Boost REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
 
-add_library(hand_regulator_module src/hand_regulator_module.cpp)
-target_include_directories(hand_regulator_module PUBLIC
+add_library(body_regulator_module src/body_regulator_module.cpp)
+target_include_directories(body_regulator_module PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(
-  hand_regulator_module
+  body_regulator_module
   "rclcpp"
   "std_msgs"
   "sensor_msgs"
@@ -47,14 +47,14 @@ ament_target_dependencies(
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
-target_compile_definitions(hand_regulator_module PRIVATE "HAND_REGULATOR_MODULE_BUILDING_LIBRARY")
+target_compile_definitions(body_regulator_module PRIVATE "HAND_REGULATOR_MODULE_BUILDING_LIBRARY")
 
 install(
   DIRECTORY include/
   DESTINATION include
 )
 install(
-  TARGETS hand_regulator_module
+  TARGETS body_regulator_module
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -79,7 +79,7 @@ ament_export_interfaces(
   export_${PROJECT_NAME}
 )
 ament_export_libraries(
-  hand_regulator_module
+  body_regulator_module
 )
 
 ament_package()

@@ -7,6 +7,7 @@
 #include "singleton.h"
 #include "robotis_device/robot.h"
 #include "robotis_device/dynamixel.h"
+#include "dynamixel_sdk/group_bulk_read.h"
 
 
 namespace robotis_framework
@@ -42,7 +43,7 @@ public:
     }
 
     virtual void  initialize(const int control_cycle_msec, Robot *robot) = 0;
-    virtual void  process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors) = 0;
+    virtual void  process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors, std::map<std::string, dynamixel::GroupBulkRead *> port_to_bulk_read) = 0;
 
     virtual void	stop() = 0;
     virtual bool	isRunning() = 0;

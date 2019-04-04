@@ -17,7 +17,7 @@
 #include "op3_base_module/base_module.h"
 
 // /* Regulator Module Header */
-#include "hand_regulator_module/hand_regulator_module.h"
+#include "body_regulator_module/body_regulator_module.h"
 
 using namespace robotis_framework;
 using namespace dynamixel;
@@ -208,7 +208,7 @@ int main(int argc, char ** argv)
   // controller->addMotionModule((MotionModule*) DirectControlModule::getInstance());
 
   /* Add Regulator Module */
-  // controller->addRegulatorModule((RegulatorModule*) HandRegulatorModule::getInstance());
+  controller->addRegulatorModule((RegulatorModule*) BodyRegulatorModule::getInstance());
 
   RCLCPP_INFO(manager_node->get_logger(), "finished add module");
 
