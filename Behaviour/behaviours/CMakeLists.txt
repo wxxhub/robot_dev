@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(behaviour_manager)
+project(behaviours)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -17,30 +17,51 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_ros REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
 find_package(robotis_controller_msgs REQUIRED)
 find_package(op3_walking_module_msgs REQUIRED)
 find_package(op3_action_module_msgs REQUIRED)
 find_package(robotis_math REQUIRED)
 
-add_executable(behaviour_manager src/behaviour_manager.cpp)
-target_include_directories(behaviour_manager PUBLIC
+add_library(behaviours src/behaviour_demo.cpp)
+
+target_include_directories(behaviours PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(
-  behaviour_manager
+  behaviours
+  "rclcpp"
   "std_msgs"
   "sensor_msgs"
-  "geometry_msgs"
   "robotis_controller_msgs"
   "op3_walking_module_msgs"
   "op3_action_module_msgs"
   "robotis_math"
 )
 
-install(TARGETS behaviour_manager
+#target_compile_definitions(behaviours PRIVATE "BALL_LAB_DETECTOR_BUILDING_LIBRARY")
+#target_link_libraries(behaviours)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+add_executable(behaviour_manager src/behaviour_manager.cpp)
+target_include_directories(behaviour_manager PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(behaviour_manager behaviours)
+
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION bin
+)
+
+install(TARGETS behaviours
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
@@ -54,5 +75,12 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_export_include_directories(
+  include
+)
+ament_export_interfaces(
+  export_${PROJECT_NAME}
+)
 
 ament_package()
