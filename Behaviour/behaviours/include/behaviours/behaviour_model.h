@@ -10,8 +10,8 @@ public:
     BehaviourModel(){}
     virtual ~BehaviourModel(){}
 
-    virtual void setDemoEnable(){}
-    virtual void setDemoDisable(){}
+    virtual void setEnable(){}
+    virtual void setDisable(){}
 
 protected:
     bool enable_;

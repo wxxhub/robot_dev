@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(behaviours)
+project(body_regulator_module)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -21,64 +21,54 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(robotis_framework_common REQUIRED)
 find_package(robotis_controller_msgs REQUIRED)
-find_package(walking_module_msgs REQUIRED)
-find_package(action_module_msgs REQUIRED)
+find_package(robotis_device REQUIRED)
 find_package(robotis_math REQUIRED)
+find_package(Boost REQUIRED)
+find_package(dynamixel_sdk REQUIRED)
 
-add_library(behaviours src/behaviour_demo/behaviour_demo.cpp)
-target_include_directories(behaviours PUBLIC
+add_library(body_regulator_module src/body_regulator_module.cpp)
+target_include_directories(body_regulator_module PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(
-  behaviours
+  body_regulator_module
   "rclcpp"
   "std_msgs"
   "sensor_msgs"
+  "robotis_framework_common"
   "robotis_controller_msgs"
-  "walking_module_msgs"
-  "action_module_msgs"
+  "robotis_device"
   "robotis_math"
+  "Boost"
+  "dynamixel_sdk"
 )
 
-target_compile_definitions(behaviours PRIVATE "BEHACIOURS_BUILDING_LIBRARY")
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(body_regulator_module PRIVATE "HAND_REGULATOR_MODULE_BUILDING_LIBRARY")
 
 install(
   DIRECTORY include/
   DESTINATION include
 )
 install(
-  TARGETS behaviours
+  TARGETS body_regulator_module
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-add_executable(behaviour_manager src/behaviour_manager.cpp)
-target_include_directories(behaviour_manager PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-target_link_libraries(behaviour_manager behaviours)
-
-install(TARGETS behaviour_manager
-  EXPORT export_${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME})
-
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}/
-)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
+  # remove the line when a copyright and license is present in all source files
+  set(ament_cmake_copyright_FOUND TRUE)
   # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
+  # remove the line when this package is a git repo
+  set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
 
@@ -88,9 +78,8 @@ ament_export_include_directories(
 ament_export_interfaces(
   export_${PROJECT_NAME}
 )
-
 ament_export_libraries(
-  behaviours
+  body_regulator_module
 )
 
 ament_package()
