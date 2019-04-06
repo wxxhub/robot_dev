@@ -7,8 +7,9 @@ namespace robot_behaviour
 class BehaviourModel
 {
 public:
-    BehaviourModel();
-    virtual ~BehaviourModel();
+    BehaviourModel(){}
+    virtual ~BehaviourModel(){}
+
     virtual void setDemoEnable(){}
     virtual void setDemoDisable(){}
 
