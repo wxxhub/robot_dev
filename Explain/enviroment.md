@@ -33,6 +33,19 @@ sudo apt install ros-$ROS_DISTRO-ros1-bridge
 
 ````
 
+#### Dynamixel_SDK
+```
+cd ~/
+mkdir lib
+cd lib
+git clone https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+cd DynamixelSDK/c++/build/linux64
+make
+sudo make install #或者sudo make reinstall
+ls /usr/local/include/dynamixel_sdk #查看头文件安装位置
+ls /usr/local/lib/libdxl_x64* #查看动态库(.so)文件安装位置
+```
+
 #### 编译工具colcon  
 [colcon](colcon.md)  
 

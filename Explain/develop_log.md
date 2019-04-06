@@ -7,3 +7,6 @@
 
 #### 2019-4-2
 > 为什么要ctrl_module 和 enable_moduel
+
+#### 2019-4-6
+> 移除Dynamixel_SDK  
