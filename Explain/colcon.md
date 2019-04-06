@@ -5,7 +5,7 @@
 
 #### 使用
 > **colcon build --symlink-install**  *编译所有文件*  
-> **colcon build --symlink-install --packages-select dynamixel_sdk**  *编译指定文件，比如dynamixel_sdlk*   
+> **colcon build --symlink-install --packages-select behaviours**  *编译指定文件，比如behaviours*   
 > **colcon -h** *查看使用帮助*  
 
 #### 注意事项

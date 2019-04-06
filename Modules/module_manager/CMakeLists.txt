@@ -23,7 +23,6 @@ find_package(action_module_msgs REQUIRED)
 find_package(walking_module_msgs REQUIRED)
 find_package(online_walking_module_msgs REQUIRED)
 find_package(tuning_module_msgs REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
 find_package(robotis_framework_common REQUIRED)
 find_package(robotis_device REQUIRED)
 find_package(robotis_controller REQUIRED)
@@ -55,7 +54,7 @@ find_library(YAML_CPP_LIBRARY
   NAMES YAML_CPP
   PATHS ${YAML_CPP_LIBRARY_DIRS}
 )
-link_directories(/usr/local/lib)  
+#link_directories(/usr/local/lib)  
 
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
 add_definitions(-DHAVE_NEW_YAMLCPP)
@@ -81,7 +80,6 @@ ament_target_dependencies(
   "walking_module_msgs"
   "online_walking_module_msgs"
   "tuning_module_msgs"
-  "dynamixel_sdk"
   "robotis_framework_common"
   "robotis_device"
   "robotis_controller"
@@ -98,6 +96,14 @@ ament_target_dependencies(
   "tuning_module"
   "body_regulator_module"
 )
+
+IF (CMAKE_SYSTEM_NAME MATCHES "Windows") 
+  message("Now is windows") 
+ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Apple") 
+  message("Now is Apple systens.") 
+ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Linux")
+  target_link_libraries(module_manager dxl_x64_cpp)
+ENDIF ()
 
 # Install binaries
 install(TARGETS ${PROJECT_NAME}

@@ -13,7 +13,6 @@
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>robotis_controller_msgs</depend>
-  <depend>dynamixel_sdk</depend>
   <depend>robotis_device</depend>
   <depend>robotis_framework_common</depend>
   <depend>Boost</depend>

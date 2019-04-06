@@ -19,7 +19,6 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
 
 add_library(robotis_device 
     src/robotis_device/dynamixel.cpp
@@ -31,12 +30,12 @@ target_include_directories(robotis_device PUBLIC
 ament_target_dependencies(
   robotis_device
   "rclcpp"
-  "dynamixel_sdk"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(robotis_device PRIVATE "ROBOTIS_DEVICE_BUILDING_LIBRARY")
+target_link_libraries(robotis_device dxl_x64_cpp)
 
 install(
   DIRECTORY include/

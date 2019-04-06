@@ -15,7 +15,6 @@
   <depend>walking_module_msgs</depend>
   <depend>online_walking_module_msgs</depend>
   <depend>tuning_module_msgs</depend>
-  <depend>dynamixel_sdk</depend>
   <depend>robotis_framework_common</depend>
   <depend>robotis_device</depend>
   <depend>robotis_controller</depend>

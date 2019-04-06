@@ -26,7 +26,6 @@ find_package(robotis_framework_common REQUIRED)
 find_package(robotis_device REQUIRED)
 find_package(robotis_math REQUIRED)
 find_package(Boost REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
 
 add_library(open_cr_module src/open_cr_module.cpp)
 target_include_directories(open_cr_module PUBLIC
@@ -41,7 +40,6 @@ ament_target_dependencies(
   "robotis_framework_common"
   "robotis_device"
   "robotis_math"
-  "dynamixel_sdk"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

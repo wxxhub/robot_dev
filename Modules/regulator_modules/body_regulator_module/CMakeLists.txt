@@ -26,7 +26,6 @@ find_package(robotis_controller_msgs REQUIRED)
 find_package(robotis_device REQUIRED)
 find_package(robotis_math REQUIRED)
 find_package(Boost REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
 
 add_library(body_regulator_module src/body_regulator_module.cpp)
 target_include_directories(body_regulator_module PUBLIC
@@ -42,7 +41,6 @@ ament_target_dependencies(
   "robotis_device"
   "robotis_math"
   "Boost"
-  "dynamixel_sdk"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

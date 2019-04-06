@@ -8,10 +8,10 @@ from launch import LaunchDescription
 
 def generate_launch_description():
 	module_manager_path = get_package_share_directory('module_manager')
-	offset_file_path = get_package_share_directory('tuning_module') + '/data/offset.yaml'
+	# offset_file_path = get_package_share_directory('tuning_module') + '/data/offset.yaml'
 	robot_file_path = module_manager_path+'/config/OP3.robot'
 	init_file_path = module_manager_path+'/config/dxl_init_OP3.yaml'
-	parameters = [{'offset_file_path':offset_file_path},{'robot_file_path':robot_file_path},{'init_file_path':init_file_path},{'device_name':'/dev/ttyUSB0'}]
+	parameters = [{'robot_file_path':robot_file_path},{'init_file_path':init_file_path},{'device_name':'/dev/ttyUSB0'}]
 	return LaunchDescription([
         # Realsense
         launch_ros.actions.Node(

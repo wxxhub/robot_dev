@@ -28,7 +28,6 @@ find_package(robotis_math REQUIRED)
 find_package(op3_kinematics_dynamics REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
 
 add_library(base_module src/base_module.cpp
                         src/base_module_state.cpp)
@@ -45,7 +44,6 @@ ament_target_dependencies(
   "robotis_device"
   "robotis_math"
   "op3_kinematics_dynamics"
-  "dynamixel_sdk"
   "ament_index_cpp"
 )
 
