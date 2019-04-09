@@ -20,6 +20,7 @@ void BodyRegulatorModule::initialize(const int control_cycle_msec, Robot *robot)
 
 void BodyRegulatorModule::process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors, std::map<std::string, dynamixel::GroupBulkRead *> port_to_bulk_read)
 {
+    static int speed_test = 0;
     for (auto& it : dxls)
     {
         Dynamixel *dxl = it.second;
@@ -29,8 +30,8 @@ void BodyRegulatorModule::process(std::map<std::string, Dynamixel *> dxls, std::
 
         error_map_[dxl->id_] = error;
     }
-
-    printError();
+    // printf("speed_test: %d\n", speed_test++);
+    // printError();
 }
 
 void BodyRegulatorModule::stop()

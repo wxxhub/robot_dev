@@ -9,9 +9,11 @@ from launch import LaunchDescription
 def generate_launch_description():
 
     parameters = None
-
+    print ("behaviour launch")
     return LaunchDescription([
         launch_ros.actions.Node(
         package="behaviours", node_executable="behaviour_manager", node_name="hebaviour_manager",
-        output="screen", parameters=parameters)
+        output="screen", parameters=parameters),
     ])
+
+    ##

@@ -32,3 +32,8 @@ colcon build --symlink-install
 > [视觉处理模块](Visual-Detector/readme.md)   
 > [ROBOTIS-Framework](ROBOTIS-Framework/readme.md)  
 > [ROBOTIS-Module](ROBOTIS-Module/readme.md)  
+
+#### 快捷使用
+```shell
+ros2 topic pub /robotis/head_control/scan_command std_msgs/String "data: scan" # 终端发布消息
+```

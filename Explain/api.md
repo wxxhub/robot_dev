@@ -13,3 +13,10 @@
 > 注意！！！
 >> 使用try,避免找不到路径报错。
 >> 参考包 ball_hsv_detector
+
+## 定义消息
+```c++
+auto control_msg = robotis_controller_msgs::msg::JointCtrlModule();  
+auto control_msg = std::make_shared<robotis_controller_msgs::msg::JointCtrlModule>(); 
+robotis_controller_msgs::msg::JointCtrlModule  control_msg  
+```

@@ -902,11 +902,12 @@ void RobotisController::setJointCtrlModuleThread(const robotis_controller_msgs::
   // stop module list
   std::list<MotionModule *> _stop_modules;
   std::list<MotionModule *> _enable_modules;
-
+  // printf("## msg->joint_name.size(): %d\n", msg->joint_name.size());
   for(unsigned int idx = 0; idx < msg->joint_name.size(); idx++)
   {
     Dynamixel *_dxl = NULL;
     std::map<std::string, Dynamixel*>::iterator _dxl_it = robot_->dxls_.find((std::string)(msg->joint_name[idx]));
+    // printf("## server get: %s %s\n", msg->joint_name[idx].c_str(), msg->module_name[idx].c_str());
     if(_dxl_it != robot_->dxls_.end())
       _dxl = _dxl_it->second;
     else
@@ -1717,7 +1718,7 @@ void RobotisController::process()
           std::string     joint_name  = dxl_it.first;
           Dynamixel      *dxl         = dxl_it.second;
           DynamixelState *dxl_state   = dxl_it.second->dxl_state_;
-
+          printf("dxl->ctrl_module_name_: %s\n", dxl->ctrl_module_name_.c_str());
           if (dxl->ctrl_module_name_ == (*module_it)->getModuleName())
           {
             //do_sync_write = true;
@@ -2252,11 +2253,11 @@ bool RobotisController::setJointCtrlModuleService(const std::shared_ptr<rmw_requ
   auto modules = std::make_shared<robotis_controller_msgs::msg::JointCtrlModule>();   // wxx_debug
   modules->joint_name = req->joint_name;
   modules->module_name = req->module_name;
-
-  // auto msg_ptr(new robotis_controller_msgs::msg::JointCtrlModule(modules));
-
+  res->result = true;
   if (modules->joint_name.size() != modules->module_name.size())
+  {
     return false;
+  }    
 
   set_module_thread_ = boost::thread(boost::bind(&RobotisController::setJointCtrlModuleThread, this,  modules));
 

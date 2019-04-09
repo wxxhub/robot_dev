@@ -30,11 +30,10 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   manager_node = rclcpp::Node::make_shared("behaviour_manager");
-
     // create wrapper object
   BehaviourModel *current_behaviour = NULL;
   BehaviourDemo  *demo_behaviour    = new BehaviourDemo();
-
+  usleep(100 * 1000);
   while (rclcpp::ok())
   {
     if (checkRobotManagerRunning(robot_manager_name) == true)
@@ -54,8 +53,11 @@ int main(int argc, char ** argv)
   // manager loop
   while (rclcpp::ok())
   {
+    // RCLCPP_INFO(manager_node->get_logger(), "running");
     if (apply_desired == true)
     {
+      desired_status = Behaviour_Demo;
+
       switch (desired_status)
       {
         case Ready:
@@ -72,13 +74,16 @@ int main(int argc, char ** argv)
         {
           if (current_behaviour != NULL)
             current_behaviour->setDisable();
-          
           current_behaviour = demo_behaviour;
           current_behaviour->setEnable();
           break;
         }
       }
+
+      apply_desired = false;
+      current_status = desired_status;
     }
+    rclcpp::WallRate(60).sleep();
   }
   return 0;
 }
@@ -90,5 +95,7 @@ void goInitPose()
 
 bool checkRobotManagerRunning(std::string& manager_name)
 {
-  return false;
+  // get_node_names
+  
+  return true;
 }

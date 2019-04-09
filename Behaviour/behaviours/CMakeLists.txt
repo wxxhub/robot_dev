@@ -18,6 +18,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -27,6 +28,13 @@ find_package(action_module_msgs REQUIRED)
 find_package(robotis_math REQUIRED)
 
 add_library(behaviours src/behaviour_demo/behaviour_demo.cpp)
+target_link_libraries(${PROJECT_NAME}
+  boost_system
+  boost_thread
+  ${Boost_LIBRARIES}
+  yaml-cpp
+  ${YAML_CPP_LIBRARIES}
+)
 target_include_directories(behaviours PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -39,6 +47,7 @@ ament_target_dependencies(
   "walking_module_msgs"
   "action_module_msgs"
   "robotis_math"
+  "ament_index_cpp"
 )
 
 target_compile_definitions(behaviours PRIVATE "BEHACIOURS_BUILDING_LIBRARY")

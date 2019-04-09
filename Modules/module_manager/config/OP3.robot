@@ -17,7 +17,7 @@ control_cycle = 8   # milliseconds
 #dynamixel | /dev/ttyUSB0 | 8   | XM430-W350     | 2.0      | l_hip_yaw      | present_position, position_p_gain, position_i_gain, position_d_gain
 #dynamixel | /dev/ttyUSB0 | 9   | XM430-W350     | 2.0      | r_hip_roll     | present_position, position_p_gain, position_i_gain, position_d_gain
 #dynamixel | /dev/ttyUSB0 | 10  | XM430-W350     | 2.0      | l_hip_roll     | present_position, position_p_gain, position_i_gain, position_d_gain
-dynamixel | /dev/ttyUSB0 | 11  | MX-28     | 1.0      | r_hip_pitch    | present_position, position_p_gain, position_i_gain, position_d_gain, present_torque
+#dynamixel | /dev/ttyUSB0 | 11  | MX-28     | 1.0      | r_hip_pitch    | present_position, position_p_gain, position_i_gain, position_d_gain, present_torque
 #dynamixel | /dev/ttyUSB0 | 12  | XM430-W350     | 2.0      | l_hip_pitch    | present_position, position_p_gain, position_i_gain, position_d_gain
 #dynamixel | /dev/ttyUSB0 | 13  | XM430-W350     | 2.0      | r_knee         | present_position, position_p_gain, position_i_gain, position_d_gain
 #dynamixel | /dev/ttyUSB0 | 14  | XM430-W350     | 2.0      | l_knee         | present_position, position_p_gain, position_i_gain, position_d_gain
