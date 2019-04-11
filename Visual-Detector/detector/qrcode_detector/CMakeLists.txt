@@ -21,7 +21,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(qrcode_detector_msgs REQUIRED)
+find_package(detector_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 
@@ -34,7 +34,7 @@ ament_target_dependencies(
   "rclcpp"
   "sensor_msgs"
   "std_msgs"
-  "qrcode_detector_msgs"
+  "detector_msgs"
   "OpenCV"
   "Boost"
 )

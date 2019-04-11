@@ -17,7 +17,7 @@ BallLabDetector::BallLabDetector()
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&BallLabDetector::imageCallback, this, std::placeholders::_1));
 
     /* publisger */
-    result_pub_ = this->create_publisher<ball_detector_msgs::msg::BallDetector>("/ball_lab_detector/result");
+    result_pub_ = this->create_publisher<detector_msgs::msg::BallDetector>("/ball_lab_detector/result");
 }
 
 BallLabDetector::~BallLabDetector()
@@ -219,7 +219,7 @@ void BallLabDetector::setShowResult(bool show_result)
 
 void BallLabDetector::publishResult()
 {
-    auto message = ball_detector_msgs::msg::BallDetector();
+    auto message = detector_msgs::msg::BallDetector();
     message.center_position.x = ball_x_;
     message.center_position.y = ball_y_;
     message.radius = ball_radius_;

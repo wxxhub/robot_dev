@@ -24,7 +24,7 @@ find_package(std_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(ball_detector_msgs REQUIRED)
+find_package(detector_msgs REQUIRED)
 find_package(timer REQUIRED)
 
 add_library(ball_lab_detector src/ball_lab_detector.cpp)
@@ -39,7 +39,7 @@ ament_target_dependencies(
   "OpenCV"
   "Boost"
   "yaml-cpp"
-  "ball_detector_msgs"
+  "detector_msgs"
   "timer"
 )
 

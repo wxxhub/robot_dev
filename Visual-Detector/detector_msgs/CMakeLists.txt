@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ball_detector_msgs)
+project(detector_msgs)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
@@ -16,7 +16,10 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/BallDetector.msg"
+  "ball_detector_msgs/msg/BallDetector.msg"
+  "qrcode_detector_msgs/msg/QRCodeMsg.msg"
+  "qrcode_detector_msgs/msg/QRCodeListMsg.msg"
+  "road_detector_msgs/msg/RoadResult.msg"
   DEPENDENCIES builtin_interfaces geometry_msgs std_msgs
 )
 

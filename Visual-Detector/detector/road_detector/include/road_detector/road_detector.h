@@ -11,7 +11,7 @@
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_srvs/srv/set_bool.hpp"
-#include "road_detector_msgs/msg/road_result.hpp"
+#include "detector_msgs/msg/road_result.hpp"
 
 namespace detector_module
 {
@@ -68,7 +68,7 @@ private:
 
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
-  rclcpp::Publisher<road_detector_msgs::msg::RoadResult>::SharedPtr result_pub_;
+  rclcpp::Publisher<detector_msgs::msg::RoadResult>::SharedPtr result_pub_;
   
   bool new_image_;
   bool show_result_;

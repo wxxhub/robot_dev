@@ -16,7 +16,7 @@
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "ball_detector_msgs/msg/ball_detector.hpp"
+#include "detector_msgs/msg/ball_detector.hpp"
 #include "ball_hsv_detector/ball_detector_config.h"
 
 namespace detector_module
@@ -73,7 +73,7 @@ private:
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
 
-  rclcpp::Publisher<ball_detector_msgs::msg::BallDetector>::SharedPtr result_pub_;
+  rclcpp::Publisher<detector_msgs::msg::BallDetector>::SharedPtr result_pub_;
 
   // ros2
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);

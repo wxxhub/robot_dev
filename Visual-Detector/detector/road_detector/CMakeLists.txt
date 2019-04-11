@@ -26,7 +26,7 @@ find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 find_package(cv_tools REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(road_detector_msgs REQUIRED)
+find_package(detector_msgs REQUIRED)
 
 add_library(road_detector src/road_detector.cpp
                           src/arrow_detector.cpp)
@@ -43,7 +43,7 @@ ament_target_dependencies(
   "Boost"
   "cv_tools"
   "yaml-cpp"
-  "road_detector_msgs"
+  "detector_msgs"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

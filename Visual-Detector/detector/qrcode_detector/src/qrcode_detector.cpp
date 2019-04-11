@@ -14,8 +14,8 @@ QRCodeDetector::QRCodeDetector()
   image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&QRCodeDetector::imageCallback, this, std::placeholders::_1));
 
   /* publisher */
-  result_list_pub_ = this->create_publisher<qrcode_detector_msgs::msg::QRCodeListMsg>("/qrcode_detector/list_result");
-  result_pub_ = this->create_publisher<qrcode_detector_msgs::msg::QRCodeMsg>("/qrcode_detector/result");
+  result_list_pub_ = this->create_publisher<detector_msgs::msg::QRCodeListMsg>("/qrcode_detector/list_result");
+  result_pub_ = this->create_publisher<detector_msgs::msg::QRCodeMsg>("/qrcode_detector/result");
   
   scanner_.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
 }
@@ -143,11 +143,11 @@ void QRCodeDetector::setShowResult(bool show_result)
 
 void QRCodeDetector::publishResult()
 {
-  qrcode_detector_msgs::msg::QRCodeListMsg msg_list;
+  detector_msgs::msg::QRCodeListMsg msg_list;
   std::list<QRCodeInfo>::iterator list_iter = qrcode_info_list_.begin();
   for (; list_iter != qrcode_info_list_.end(); ++list_iter)
   {
-    qrcode_detector_msgs::msg::QRCodeMsg info_msg;
+    detector_msgs::msg::QRCodeMsg info_msg;
     info_msg.type_name     = list_iter->type_name;
     info_msg.data          = list_iter->data;
     info_msg.image_width   = image_width_;

@@ -19,7 +19,7 @@ RoadDetector::RoadDetector()
 {
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
 
-    result_pub_ = this->create_publisher<road_detector_msgs::msg::RoadResult>("/road_detector/result");
+    result_pub_ = this->create_publisher<detector_msgs::msg::RoadResult>("/road_detector/result");
 
     auto enable_server = this->create_service<std_srvs::srv::SetBool>("/road_detector/enable", std::bind(&RoadDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
@@ -398,7 +398,7 @@ bool RoadDetector::newImage()
 
 void RoadDetector::publishResult()
 {
-    auto message = road_detector_msgs::msg::RoadResult();
+    auto message = detector_msgs::msg::RoadResult();
     message.road_exist = result_.road_exist;
     message.mark_exist = result_.mark_exist;
     message.up_x = result_.up_point.x;

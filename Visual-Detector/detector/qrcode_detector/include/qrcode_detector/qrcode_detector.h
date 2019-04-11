@@ -9,8 +9,8 @@
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "qrcode_detector_msgs/msg/qr_code_msg.hpp"
-#include "qrcode_detector_msgs/msg/qr_code_list_msg.hpp"
+#include "detector_msgs/msg/qr_code_msg.hpp"
+#include "detector_msgs/msg/qr_code_list_msg.hpp"
 
 #include "zbar.h"
 
@@ -45,8 +45,8 @@ private:
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
 
-  rclcpp::Publisher<qrcode_detector_msgs::msg::QRCodeListMsg>::SharedPtr result_list_pub_;
-  rclcpp::Publisher<qrcode_detector_msgs::msg::QRCodeMsg>::SharedPtr result_pub_;
+  rclcpp::Publisher<detector_msgs::msg::QRCodeListMsg>::SharedPtr result_list_pub_;
+  rclcpp::Publisher<detector_msgs::msg::QRCodeMsg>::SharedPtr result_pub_;
 
   bool new_image_;
   bool show_result_;

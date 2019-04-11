@@ -26,6 +26,7 @@ find_package(robotis_controller_msgs REQUIRED)
 find_package(walking_module_msgs REQUIRED)
 find_package(action_module_msgs REQUIRED)
 find_package(robotis_math REQUIRED)
+find_package(detector_msgs)
 
 add_library(behaviours src/behaviour_demo/behaviour_demo.cpp)
 target_link_libraries(${PROJECT_NAME}
@@ -48,6 +49,7 @@ ament_target_dependencies(
   "action_module_msgs"
   "robotis_math"
   "ament_index_cpp"
+  "detector_msgs"
 )
 
 target_compile_definitions(behaviours PRIVATE "BEHACIOURS_BUILDING_LIBRARY")

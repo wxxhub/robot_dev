@@ -24,7 +24,7 @@ find_package(std_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(ball_detector_msgs REQUIRED)
+find_package(detector_msgs REQUIRED)
 find_package(timer REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -56,7 +56,7 @@ ament_target_dependencies(
   "OpenCV"
   "Boost"
   "yaml-cpp"
-  "ball_detector_msgs"
+  "detector_msgs"
   "timer"
   "ament_index_cpp"
 )
