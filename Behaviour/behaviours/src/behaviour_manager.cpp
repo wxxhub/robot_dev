@@ -96,6 +96,6 @@ void goInitPose()
 bool checkRobotManagerRunning(std::string& manager_name)
 {
   // get_node_names
-  
+  usleep(5000 * 1000);
   return true;
 }

@@ -77,13 +77,13 @@ install(TARGETS road_detector_node
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
-add_executable(road_detector_form_usb src/road_detector_form_usb.cpp)
-target_include_directories(road_detector_form_usb PUBLIC
+add_executable(road_detector_usbcam src/road_detector_usbcam.cpp)
+target_include_directories(road_detector_usbcam PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_link_libraries(road_detector_form_usb road_detector)
+target_link_libraries(road_detector_usbcam road_detector)
 
-install(TARGETS road_detector_form_usb
+install(TARGETS road_detector_usbcam
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
 

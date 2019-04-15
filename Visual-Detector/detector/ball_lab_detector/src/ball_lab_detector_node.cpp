@@ -10,7 +10,7 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
 
   VideoCapture cap(0);
-  rclcpp::WallRate loop_rate(125);
+  rclcpp::WallRate loop_rate(30);
 
   if(!cap.isOpened())
 	{

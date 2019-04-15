@@ -69,6 +69,21 @@ install(TARGETS ball_lab_detector_node
   EXPORT export_${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
+add_executable(ball_lab_detector_usbcam src/ball_lab_detector_usbcam.cpp)
+target_include_directories(ball_lab_detector_usbcam PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_link_libraries(ball_lab_detector_usbcam ball_lab_detector)
+
+install(TARGETS ball_lab_detector_usbcam
+  EXPORT export_${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
