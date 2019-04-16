@@ -16,6 +16,7 @@
 // #include "action_module/action_module.h"
 #include "base_module/base_module.h"
 #include "head_control_module/head_control_module.h"
+#include "walking_module/walking_module.h"
 
 // /* Regulator Module Header */
 #include "body_regulator_module/body_regulator_module.h"
@@ -205,7 +206,7 @@ int main(int argc, char ** argv)
   // controller->addMotionModule((MotionModule*) ActionModule::getInstance());
   controller->addMotionModule((MotionModule*) BaseModule::getInstance());
   controller->addMotionModule((MotionModule*) HeadControlModule::getInstance());
-  // controller->addMotionModule((MotionModule*) WalkingModule::getInstance());
+  controller->addMotionModule((MotionModule*) WalkingModule::getInstance());
   // controller->addMotionModule((MotionModule*) DirectControlModule::getInstance());
 
   /* Add Regulator Module */

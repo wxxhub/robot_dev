@@ -50,7 +50,14 @@ void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
     result_[joint_name]->goal_position_ = dxl_info->dxl_state_->goal_position_;
   }
 
-  init_pose_file_path_ = ament_index_cpp::get_package_share_directory("base_module") + "/data/ini_pose.yaml";
+  try
+  {
+    init_pose_file_path_ = ament_index_cpp::get_package_share_directory("base_module") + "/data/ini_pose.yaml";
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
 	std::cout<<"init_pose_file_path_: "<<init_pose_file_path_<<std::endl;
 
 	/* publish topics */

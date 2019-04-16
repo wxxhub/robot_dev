@@ -21,7 +21,8 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(robotis_math REQUIRED)
 
-add_library(op3_kinematics_dynamics src/op3_kinematics_dynamics.cpp)
+add_library(op3_kinematics_dynamics src/op3_kinematics_dynamics.cpp
+                                    src/link_data.cpp)
 target_include_directories(op3_kinematics_dynamics PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)

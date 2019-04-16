@@ -88,8 +88,8 @@ install(TARGETS road_detector_usbcam
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
-install(DIRECTORY
-  launch
+install(
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
 

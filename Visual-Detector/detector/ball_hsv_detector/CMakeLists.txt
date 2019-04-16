@@ -114,8 +114,8 @@ ament_export_libraries(
 )
 
 # Install config files.
-install(DIRECTORY
-  config
+install(
+  DIRECTORY config
   DESTINATION share/${PROJECT_NAME}/
 )
 

@@ -46,8 +46,8 @@ install(TARGETS usb_cam_node
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
-install(DIRECTORY
-  launch
+install(
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
 

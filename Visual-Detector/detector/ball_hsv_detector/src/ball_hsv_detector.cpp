@@ -25,9 +25,7 @@ BallHsvDetector::BallHsvDetector()
     {
       default_setting_path_ = ament_index_cpp::get_package_share_directory("ball_hsv_detector") + "/config/ball_detector_params.yaml";
 		  resetParameter();
-    }
-    catch(const std::exception& e)
-    {
+    } catch(const std::exception& e) {
         std::cerr << e.what() << '\n';
     }
 }

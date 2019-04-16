@@ -5,6 +5,7 @@
 #include "behaviors/behaviors.h"
 
 using namespace robot_behavior;
+using namespace std;
 
 enum Behaviors_Status
 {
@@ -21,7 +22,7 @@ rclcpp::Publisher<std_msgs::msg::String>::SharedPtr set_mode_pub;
 int current_status = Ready;
 int desired_status = Ready;
 bool apply_desired = true;
-std::string robot_manager_name = "/module_manager";
+std::string robot_manager_name = "module_manager";
 
 void goInitPose();
 bool checkRobotManagerRunning(std::string& manager_name);
@@ -96,6 +97,19 @@ void goInitPose()
 bool checkRobotManagerRunning(std::string& manager_name)
 {
   // get_node_names
-  usleep(5000 * 1000);
-  return true;
+
+  vector<string> node_list = manager_node->get_node_names();
+
+  vector<string>::iterator iter = node_list.begin();
+
+  for (; iter != node_list.end(); iter++)
+  {
+    if (manager_name == *iter)
+    {
+      usleep(500 * 1000);
+      return true;
+    }
+  }
+  usleep(500 * 1000);
+  return false;
 }

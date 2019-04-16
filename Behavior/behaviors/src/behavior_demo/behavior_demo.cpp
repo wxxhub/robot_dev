@@ -15,7 +15,14 @@ BehaviorDemo::BehaviorDemo()
 
     behavior_node_ = rclcpp::Node::make_shared("behavior_demo");
     behavior_client_node_ = rclcpp::Node::make_shared("behavior_demo_client");
-    string default_path = ament_index_cpp::get_package_share_directory("behaviors")+"/config/gui_config.yaml";
+
+    string default_path = " ";
+    try
+    {
+        default_path = ament_index_cpp::get_package_share_directory("behaviors")+"/config/gui_config.yaml";
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
     string path = "";
 
     behavior_node_->get_parameter_or("demo_config", path, default_path);

@@ -54,12 +54,18 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
+
 install(
   TARGETS walking_module
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
+)
+
+install(
+  DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 if(BUILD_TESTING)
