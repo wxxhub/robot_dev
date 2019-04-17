@@ -11,7 +11,7 @@ def generate_launch_description():
                   {'device_2_name':'device2'},]
     return LaunchDescription([
         launch_ros.actions.Node(
-            package='usb_cam', node_executable='usb_cam_node', node_name='usb_cam_node', output='screen',
+            package='usb_cam', node_executable='usb_cam_node', node_name='usb_cam_node_launch', output='screen',
             parameters=parameters
         )
     ])

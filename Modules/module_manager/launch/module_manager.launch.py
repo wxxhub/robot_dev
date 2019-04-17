@@ -15,7 +15,7 @@ def generate_launch_description():
 	return LaunchDescription([
         # Realsense
         launch_ros.actions.Node(
-            package='module_manager', node_executable='module_manager',node_name='module_manager',
+            package='module_manager', node_executable='module_manager', node_name='module_manager',
             output='screen', parameters=parameters),
     ])
 

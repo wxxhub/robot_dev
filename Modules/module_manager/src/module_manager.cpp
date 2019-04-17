@@ -13,7 +13,7 @@
 #include "open_cr_module/open_cr_module.h"
 
 // /* Motion Module Header */
-// #include "action_module/action_module.h"
+#include "action_module/action_module.h"
 #include "base_module/base_module.h"
 #include "head_control_module/head_control_module.h"
 #include "walking_module/walking_module.h"
@@ -203,7 +203,7 @@ int main(int argc, char ** argv)
   // controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
 
   /* Add Motion Module */
-  // controller->addMotionModule((MotionModule*) ActionModule::getInstance());
+  controller->addMotionModule((MotionModule*) ActionModule::getInstance());
   controller->addMotionModule((MotionModule*) BaseModule::getInstance());
   controller->addMotionModule((MotionModule*) HeadControlModule::getInstance());
   controller->addMotionModule((MotionModule*) WalkingModule::getInstance());
