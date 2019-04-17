@@ -23,7 +23,7 @@ def generate_launch_description():
             get_package_share_directory('ball_lab_detector') + '/launch/ball_lab_detector.launch.py'))
 
     behavior_manager_node = launch_ros.actions.Node(
-            package="behaviors", node_executable="behavior_manager", node_name="hebaviour_manager_launch",
+            package="behaviors", node_executable="behavior_manager",
             output="screen", parameters=parameters)
 
     return LaunchDescription([

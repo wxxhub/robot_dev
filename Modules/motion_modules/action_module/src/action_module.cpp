@@ -83,7 +83,7 @@ void ActionModule::initialize(const int control_cycle_msec, robotis_framework::R
     std::string path = "";
     try
     {
-        path  = ament_index_cpp::get_package_share_directory("op3_action_module") + "/data/motion_4095.bin";
+      path  = ament_index_cpp::get_package_share_directory("action_module") + "/data/motion_4095.bin";
     }
     catch(const std::exception& e)
     {
@@ -91,7 +91,7 @@ void ActionModule::initialize(const int control_cycle_msec, robotis_framework::R
     }
     
     std::string action_file_path = "";
-    module_node_->get_parameter_or("action_file_path", path, action_file_path);
+    module_node_->get_parameter_or("action_file_path", action_file_path, path);
 
     loadFile(action_file_path);
 
@@ -135,7 +135,7 @@ void ActionModule::pageNumberCallback(const std_msgs::msg::Int32::SharedPtr msg)
     if (enable_ == false)
     {
         std::string status_msg = "Action Module is not enabled";
-        RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return;
     }
@@ -157,13 +157,13 @@ void ActionModule::pageNumberCallback(const std_msgs::msg::Int32::SharedPtr msg)
         if (start(msg->data) == true)
         {
             std::string status_msg = "Succeed to start page " + convertIntToString(msg->data);
-            RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg);
+            RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg.c_str());
             publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_INFO, status_msg);
         }
         else
         {
             std::string status_msg = "Failed to start page " + convertIntToString(msg->data);
-            RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+            RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
             publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
             publishDoneMsg("action_failed");
         }
@@ -175,7 +175,7 @@ void ActionModule::startActionCallback(const action_module_msgs::msg::StartActio
     if (enable_ == false)
     {
         std::string status_msg = "Action Module is not enabled";
-        RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return;
     }
@@ -202,7 +202,7 @@ void ActionModule::startActionCallback(const action_module_msgs::msg::StartActio
             if (joints_enable_it == action_joints_enable_.end())
             {
                 std::string status_msg = "Invalid Joint Name : " + msg->joint_name_array[joint_idx];
-                RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg);
+                RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg.c_str());
                 publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
                 publishDoneMsg("action_failed");
                 return;
@@ -216,13 +216,13 @@ void ActionModule::startActionCallback(const action_module_msgs::msg::StartActio
         if (start(msg->page_num) == true)
         {
             std::string status_msg = "Succeed to start page " + convertIntToString(msg->page_num);
-            RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg);
+            RCLCPP_INFO(module_node_->get_logger(), "%s", status_msg.c_str());
             publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_INFO, status_msg);
         }
         else
         {
             std::string status_msg = "Failed to start page " + convertIntToString(msg->page_num);
-            RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+            RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
             publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
             publishDoneMsg("action_failed");
         }
@@ -358,7 +358,7 @@ bool ActionModule::loadFile(std::string file_name)
     if (action == 0)
     {
         std::string status_msg = "Can not open Action file!";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }
@@ -367,7 +367,7 @@ bool ActionModule::loadFile(std::string file_name)
     if (ftell(action) != (long) (sizeof(action_file_define::Page) * action_file_define::MAXNUM_PAGE))
     {
         std::string status_msg = "It's not an Action file!";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         fclose(action);
         return false;
@@ -386,7 +386,7 @@ bool ActionModule::createFile(std::string file_name)
     if (action == 0)
     {
         std::string status_msg = "Can not create Action file!";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }
@@ -410,7 +410,7 @@ bool ActionModule::start(int page_number)
     if (page_number < 1 || page_number >= action_file_define::MAXNUM_PAGE)
     {
         std::string status_msg = "Can not play page.(" + convertIntToString(page_number) + " is invalid index)";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }
@@ -440,7 +440,7 @@ bool ActionModule::start(std::string page_name)
     {
         std::string str_name_page = page_name;
         std::string status_msg = "Can not play page.(" + str_name_page + " is invalid name)\n";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }
@@ -453,7 +453,7 @@ bool ActionModule::start(int page_number, action_file_define::Page* page)
     if (enable_ == false)
     {
         std::string status_msg = "Action Module is disabled";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }
@@ -461,7 +461,7 @@ bool ActionModule::start(int page_number, action_file_define::Page* page)
     if (playing_ == true)
     {
         std::string status_msg = "Can not play page " + convertIntToString(page_number) + ".(Now playing)";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }
@@ -471,7 +471,7 @@ bool ActionModule::start(int page_number, action_file_define::Page* page)
     if (play_page_.header.repeat == 0 || play_page_.header.stepnum == 0)
     {
         std::string status_msg = "Page " + convertIntToString(page_number) + " has no action\n";
-        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg);
+        RCLCPP_ERROR(module_node_->get_logger(), "%s", status_msg.c_str());
         publishStatusMsg(robotis_controller_msgs::msg::StatusMsg::STATUS_ERROR, status_msg);
         return false;
     }

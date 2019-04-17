@@ -10,6 +10,7 @@
 #include "robotis_controller/robotis_controller.h"
 
 // /* Sensor Module Header */
+#include "cm_740_module/cm_740_module.h"
 #include "open_cr_module/open_cr_module.h"
 
 // /* Motion Module Header */
@@ -200,7 +201,8 @@ int main(int argc, char ** argv)
 //  RCLCPP_INFO(manager_node->get_logger(), "start add module");
 
   /* Add Sensor Module */
-  // controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
+  controller->addSensorModule((SensorModule*) OpenCRModule::getInstance());
+  controller->addSensorModule((Cm740Module*) Cm740Module::getInstance());
 
   /* Add Motion Module */
   controller->addMotionModule((MotionModule*) ActionModule::getInstance());

@@ -16,7 +16,7 @@ const std::string DEVICE_2_NAME = "device_2";
 const std::string DEVICE_3_NAME = "device_3";
 const std::string DEVICE_4_NAME = "device_4";
 
-boost::mutex  open_video_mutex_;
+rclcpp::Node::SharedPtr cam_node;
 
 struct DeviceInfo
 {
@@ -55,8 +55,16 @@ void convert_frame_to_message(const cv::Mat & frame, size_t frame_id, sensor_msg
 
 void pubThread(DeviceInfo device)
 {
-  printf ("start thread: %d\n", device.device_num);
-  VideoCapture cap(device.device_num);
+  VideoCapture cap;
+  try
+  {
+    cap.open(device.device_num);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
+  
   if (!cap.isOpened())
   {
     printf ("failed open device num: %d\n", device.device_num);
@@ -82,9 +90,8 @@ int main(int argc, char ** argv)
   int device_3_num = -1;
   int device_4_num = -1;
 
-  printf("test1\n");
   rclcpp::init(argc, argv);
-  auto cam_node = rclcpp::Node::make_shared("usb_cam");
+  cam_node = rclcpp::Node::make_shared("usb_cam");
 
   cam_node->get_parameter_or("device_0_num", device_0_num, NO_DEVICE_NUM);
   cam_node->get_parameter_or("device_1_num", device_1_num, NO_DEVICE_NUM);
@@ -92,16 +99,12 @@ int main(int argc, char ** argv)
   cam_node->get_parameter_or("device_3_num", device_3_num, NO_DEVICE_NUM);
   cam_node->get_parameter_or("device_4_num", device_4_num, NO_DEVICE_NUM);
 
-  printf("test2\n");
-  std::vector<DeviceInfo> run_pub;
-  std::vector<boost::thread*> process_thread;
   if (device_0_num != -1)
   {
     DeviceInfo device;
     device.device_num = device_0_num;
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image0");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
-    device_thread.detach();
   }
 
   if (device_1_num != -1)
@@ -110,7 +113,6 @@ int main(int argc, char ** argv)
     device.device_num = device_1_num;
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image1");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
-    device_thread.detach();
   }
 
   if (device_2_num != -1)
@@ -119,7 +121,6 @@ int main(int argc, char ** argv)
     device.device_num = device_2_num;
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image2");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
-    device_thread.detach();
   }
 
   if (device_3_num != -1)
@@ -128,7 +129,6 @@ int main(int argc, char ** argv)
     device.device_num = device_3_num;
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image3");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
-    device_thread.detach();
   }
 
   if (device_4_num != -1)
@@ -137,10 +137,9 @@ int main(int argc, char ** argv)
     device.device_num = device_4_num;
     device.image_pub = cam_node->create_publisher<sensor_msgs::msg::Image>("/usb_cam_pub/image4");
     boost::thread device_thread = boost::thread(boost::bind(&pubThread, device));
-    device_thread.detach();
   }
-  printf("test3\n");
-  rclcpp::WallRate loop_rate(50);
+
+  rclcpp::WallRate loop_rate(1);
 
   while (rclcpp::ok())
   {

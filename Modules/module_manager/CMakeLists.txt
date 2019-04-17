@@ -30,6 +30,7 @@ find_package(robotis_math REQUIRED)
 find_package(op3_kinematics_dynamics REQUIRED)
 find_package(op3_balance_control REQUIRED)
 find_package(open_cr_module REQUIRED)
+find_package(cm_740_module REQUIRED)
 find_package(base_module REQUIRED)
 find_package(head_control_module REQUIRED)
 find_package(walking_module REQUIRED)
@@ -95,6 +96,7 @@ ament_target_dependencies(
   "online_walking_module"
   "tuning_module"
   "body_regulator_module"
+  "cm_740_module"
 )
 
 IF (CMAKE_SYSTEM_NAME MATCHES "Windows") 

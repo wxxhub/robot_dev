@@ -47,9 +47,11 @@ private:
   int control_cycle_msec_;
   boost::thread queue_thread_;
   std::map<std::string, bool> buttons_;
-  // std::map<std::string, ros::Time> buttons_press_time_;
-  // ros::Time button_press_time_;
-  // ros::Time last_msg_time_;
+  std::map<std::string, rclcpp::Time> buttons_press_time_;
+  rclcpp::Time button_press_time_;
+  rclcpp::Time last_msg_time_;
+  rclcpp::Clock ros_clock_;
+  rclcpp::Node::SharedPtr module_node_;
   double previous_volt_;
   double present_volt_;
 
