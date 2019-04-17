@@ -38,3 +38,7 @@ colcon build --symlink-install
 ```shell
 ros2 topic pub /robotis/head_control/scan_command std_msgs/String "data: scan" # 终端发布消息
 ```
+
+#### 弃用模块 
+> online_walking_module 结果比较复杂, 几乎不使用   
+> tuning_module 暂时没有用途  

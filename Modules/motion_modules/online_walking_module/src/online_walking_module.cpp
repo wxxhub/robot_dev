@@ -1,7 +1,7 @@
 #include "online_walking_module/online_walking_module.h"
 
-namespace online_walking_module
-{
+/*
+using namespace robotis_op;
 
 OnlineWalkingModule::OnlineWalkingModule()
 {
@@ -10,5 +10,4 @@ OnlineWalkingModule::OnlineWalkingModule()
 OnlineWalkingModule::~OnlineWalkingModule()
 {
 }
-
-}  // namespace online_walking_module
+*/
