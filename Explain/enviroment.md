@@ -17,7 +17,7 @@ sudo apt update
 sudo apt install ros-$CHOOSE_ROS_DISTRO-desktop
 
 sudo apt install python3-argcomplete
-echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+echo "source /opt/ros/$ROS_DISTRO/local_setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
 # Install additional RMW implementations¶
