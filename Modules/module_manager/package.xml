@@ -28,8 +28,6 @@
   <depend>walking_module</depend>
   <depend>action_module</depend>
   <depend>direct_control_module</depend>
-  <depend>online_walking_module</depend>
-  <depend>tuning_module</depend>
   <depend>body_regulator_module</depend>
   <depend>Boost</depend>
   <depend>PkgConfig</depend>

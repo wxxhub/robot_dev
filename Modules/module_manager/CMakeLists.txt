@@ -36,8 +36,6 @@ find_package(head_control_module REQUIRED)
 find_package(walking_module REQUIRED)
 find_package(action_module REQUIRED)
 find_package(direct_control_module REQUIRED)
-find_package(online_walking_module REQUIRED)
-find_package(tuning_module REQUIRED)
 find_package(body_regulator_module REQUIRED)
 find_package(Boost REQUIRED)
 if (NOT Boost_FOUND)
@@ -93,8 +91,6 @@ ament_target_dependencies(
   "walking_module"
   "action_module"
   "direct_control_module"
-  "online_walking_module"
-  "tuning_module"
   "body_regulator_module"
   "cm_740_module"
 )
