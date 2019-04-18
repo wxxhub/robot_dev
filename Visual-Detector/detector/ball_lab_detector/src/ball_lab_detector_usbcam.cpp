@@ -21,6 +21,6 @@ int main(int argc, char ** argv)
     loop_rate.sleep();
   }
 
-  printf("hello world ball_lab_detector package\n");
+  printf("ball_lab_detector end\n");
   return 0;
 }

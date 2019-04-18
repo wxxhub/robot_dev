@@ -51,6 +51,8 @@ void BehaviorDemo::callbackThread()
     ball_sub_ = behavior_node_->create_subscription<detector_msgs::msg::BallDetector>("/ball_lab_detector/result", std::bind(&BehaviorDemo::ballDetCallback, this, std::placeholders::_1));
 
     set_joint_module_client_ = behavior_client_node_->create_client<robotis_controller_msgs::srv::SetJointModule>("/robotis/set_present_joint_ctrl_modules");
+    set_road_detector_client_ = behavior_client_node_->create_client<std_srvs::srv::SetBool>("/ball_lab_detector/enable");
+
     rclcpp::WallRate loop_rate(spin_rate_);
     while (rclcpp::ok())
     {
@@ -140,11 +142,41 @@ void BehaviorDemo::callServiceSettingModule(const robotis_controller_msgs::msg::
 
     printf("modules->joint_name.size(): %d\n", modules->joint_name.size());
     printf("set_joint_srv->joint_name.size(): %d\n", set_joint_srv->joint_name.size());
+    while (!set_joint_module_client_->wait_for_service(std::chrono::seconds(1))) 
+    {
+        if (!rclcpp::ok()) 
+        {
+            RCLCPP_ERROR(behavior_client_node_->get_logger(), "client interrupted while waiting for service to appear.");
+        }
+            RCLCPP_INFO(behavior_client_node_->get_logger(), "waiting for service to appear...");
+    }
     auto result_future = set_joint_module_client_->async_send_request(set_joint_srv);
     if (rclcpp::spin_until_future_complete(behavior_client_node_, result_future) != 
         rclcpp::executor::FutureReturnCode::SUCCESS)
     {
         RCLCPP_ERROR(behavior_client_node_->get_logger(), "Failed to set module");
+        return;
+    }
+}
+
+void BehaviorDemo::enableDet(bool enable)
+{
+    auto enable_detector = std::make_shared<std_srvs::srv::SetBool::Request>();
+
+    enable_detector->data = enable;
+    while (!set_road_detector_client_->wait_for_service(std::chrono::seconds(1))) 
+    {
+        if (!rclcpp::ok()) 
+        {
+            RCLCPP_ERROR(behavior_client_node_->get_logger(), "client interrupted while waiting for service to appear.");
+        }
+            RCLCPP_INFO(behavior_client_node_->get_logger(), "waiting for service to appear...");
+    }
+    auto result_future = set_road_detector_client_->async_send_request(enable_detector);
+    if (rclcpp::spin_until_future_complete(behavior_client_node_, result_future) != 
+        rclcpp::executor::FutureReturnCode::SUCCESS)
+    {
+        RCLCPP_ERROR(behavior_client_node_->get_logger(), "Failed to enable ball_detector");
         return;
     }
 }
@@ -164,9 +196,11 @@ void BehaviorDemo::setDisable()
 void BehaviorDemo::startDemo()
 {
     setModuleToDemo("head_control_module");
+    enableDet(true);
 }
 
 void BehaviorDemo::stopDemo()
 {
-    
+    setModuleToDemo("none");
+    enableDet(false);
 }

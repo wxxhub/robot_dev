@@ -21,6 +21,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(robotis_controller_msgs REQUIRED)
 find_package(walking_module_msgs REQUIRED)
@@ -28,7 +29,10 @@ find_package(action_module_msgs REQUIRED)
 find_package(robotis_math REQUIRED)
 find_package(detector_msgs)
 
-add_library(behaviors src/behavior_demo/behavior_demo.cpp)
+add_library(behaviors 
+  src/behavior_demo/behavior_demo.cpp
+  src/marathon/marathon.cpp
+)
 target_link_libraries(${PROJECT_NAME}
   boost_system
   boost_thread
@@ -43,6 +47,7 @@ ament_target_dependencies(
   behaviors
   "rclcpp"
   "std_msgs"
+  "std_srvs"
   "sensor_msgs"
   "robotis_controller_msgs"
   "walking_module_msgs"

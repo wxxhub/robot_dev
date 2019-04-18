@@ -69,6 +69,7 @@ private:
   rclcpp::Node::SharedPtr detector_node_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
   rclcpp::Publisher<detector_msgs::msg::RoadResult>::SharedPtr result_pub_;
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr enable_server_;
   
   bool new_image_;
   bool show_result_;

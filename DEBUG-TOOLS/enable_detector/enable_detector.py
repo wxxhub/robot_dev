@@ -1,36 +1,31 @@
 import rclpy
 
 from std_msgs.msg import String
+from std_srvs.srv import SetBool
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     node = rclpy.create_node('minimal_publisher')
-    publisher = node.create_publisher(String, 'topic')
+    client = node.create_client(SetBool, '/road_detector/enable')
 
-    msg = String()
-    i = 0
+    req = SetBool.Request()
+    req.data = True
+    
+    while not client.wait_for_service(timeout_sec=1.0):
+        node.get_logger().info('service not available, waiting again...')
 
-    def timer_callback():
-        nonlocal i
-        msg.data = 'Hello World: %d' % i
-        i += 1
-        node.get_logger().info('Publishing: "%s"' % msg.data)
-        publisher.publish(msg)
+    future = client.call_async(req)
+    rclpy.spin_until_future_complete(node, future)
+    
+    if future.result is not None:
+        node.get_logger.info('Service call success')
+    else:
+        node.get_logger.info('Service call failed')
 
-    timer_period = 0.5  # seconds
-    timer = node.create_timer(timer_period, timer_callback)
-
-    rclpy.spin(node)
-
-    # Destroy the timer attached to the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    node.destroy_timer(timer)
     node.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()

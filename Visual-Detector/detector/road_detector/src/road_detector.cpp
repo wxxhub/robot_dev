@@ -1,7 +1,7 @@
 #include "road_detector/road_detector.h"
 #include "cv_tools/cv_tools.hpp"
 
-// #define IMAGE_DEBUG
+#define IMAGE_DEBUG
 using std::placeholders::_1;
 using namespace cv;
 using namespace detector_module;
@@ -10,18 +10,18 @@ RoadDetector::RoadDetector()
     : new_image_(false),
       Node("road_detector"),
       road_color(RED),
-      show_result_(false),
-      mark_detector_(true),
+      show_result_(true),
+      mark_detector_(false),
       wite_background_(true),
       mark_rect_width_(120),
       half_mark_rect_width_(mark_rect_width_/2),
-      enable_(false)
+      enable_(true)
 {
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
 
     result_pub_ = this->create_publisher<detector_msgs::msg::RoadResult>("/road_detector/result");
 
-    auto enable_server = this->create_service<std_srvs::srv::SetBool>("/road_detector/enable", std::bind(&RoadDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    enable_server_ = this->create_service<std_srvs::srv::SetBool>("/road_detector/enable", std::bind(&RoadDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 RoadDetector::~RoadDetector()
@@ -31,6 +31,9 @@ RoadDetector::~RoadDetector()
 
 void RoadDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
+    if (!enable_)
+        return;
+
     static bool first_image = true;
     // printf("new image test\n");
     Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
@@ -60,8 +63,9 @@ void RoadDetector::process()
     if (!enable_)
         return;
 
-    detector(input_image_);
-    publishResult();
+    int detector_result = detector(input_image_);
+    if (detector_result != 0)
+        publishResult();
     showResult(input_image_);
 }
 
@@ -78,8 +82,9 @@ void RoadDetector::process(Mat image)
         first_image = false;
     }
     input_image_ = image.clone();
-    detector(input_image_);
-    publishResult();
+    int detector_result = detector(input_image_);
+    if (detector_result != 0)
+        publishResult();
     showResult(image);
 }
 
@@ -130,6 +135,7 @@ int RoadDetector::detector(Mat image)
     try
     {
         imshow("road_lab", road_lab);
+        cvWaitKey(5);
     }
     catch(const std::exception& e)
     {
@@ -150,6 +156,7 @@ int RoadDetector::detector(Mat image)
         result_.road_exist = false;
 		result_.up_point = Point2f(0,0);
 		result_.down_point = Point2f(0,0);
+        return 0;
     }
 
     if (!mark_detector_)
@@ -175,6 +182,8 @@ int RoadDetector::detector(Mat image)
     else
         result_.direction = DIRECT;
 */ 
+
+    return 1;
 }
 
 bool RoadDetector::getRoad(Mat road_lab, Point2f &up_point, Point2f &down_point, float &road_angle)
@@ -367,7 +376,7 @@ void RoadDetector::showResult(cv::Mat image)
         try
         {
             imshow("Roade_result", result_image);
-            cvWaitKey(1);
+            cvWaitKey(10);
         }
         catch(const std::exception& e)
         {

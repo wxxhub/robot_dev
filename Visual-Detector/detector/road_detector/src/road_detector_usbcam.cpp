@@ -8,8 +8,8 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto road_detector = std::make_shared<detector_module::RoadDetector>();
-  rclcpp::WallRate loop_rate(30);
-  road_detector->setShowResult(true);
+  rclcpp::WallRate loop_rate(40);
+  road_detector->setShowResult(false);
   while (rclcpp::ok())
   {
     rclcpp::spin_some(road_detector);
@@ -19,9 +19,7 @@ int main(int argc, char ** argv)
     }
     loop_rate.sleep();
   }
-  // rclcpp::spin(road_detector);
-  // rclcpp::shutdown();
 
-  printf("hello world road_detector package\n");
+  printf("road_detector end\n");
   return 0;
 }

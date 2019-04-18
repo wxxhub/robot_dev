@@ -7,5 +7,6 @@
 
 // include behavior
 #include "behaviors/behavior_demo.h"
+#include "behaviors/marathon.h"
 
 #endif  // BEHAVIORS__BEHAVIORS_H_

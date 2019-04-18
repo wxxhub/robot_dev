@@ -11,13 +11,15 @@ BallLabDetector::BallLabDetector()
       Node("ball_lab_detector"),
       show_result_(false),
       ball_color_(RED),
-      min_area_(200.0)
+      min_area_(200.0),
+      enable_(false)
 {
     /* sublisher */
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&BallLabDetector::imageCallback, this, std::placeholders::_1));
 
     /* publisger */
     result_pub_ = this->create_publisher<detector_msgs::msg::BallDetector>("/ball_lab_detector/result");
+    enable_server_ = this->create_service<std_srvs::srv::SetBool>("/ball_lab_detector/enable", std::bind(&BallLabDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 BallLabDetector::~BallLabDetector()
@@ -27,6 +29,9 @@ BallLabDetector::~BallLabDetector()
 
 void BallLabDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
+    if (!enable_)
+        return;
+
     static bool first_image = true;
     Mat frame(msg->height, msg->width, encodingToMatType(msg->encoding),
               const_cast<unsigned char*>(msg->data.data()), msg->step);
@@ -43,8 +48,19 @@ void BallLabDetector::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg
     new_image_ = true;
 }
 
+void BallLabDetector::enableServer(const std::shared_ptr<rmw_request_id_t> request_header,
+                                const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                const std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+{
+    enable_ = request->data;
+    response->success = true;
+}
+
 void BallLabDetector::process(cv::Mat image)
 {
+    if (!enable_)
+        return;
+
     static bool first_image = true;
     if (first_image)
     {
@@ -63,6 +79,9 @@ void BallLabDetector::process(cv::Mat image)
 
 void BallLabDetector::process()
 {
+    if (!enable_)
+        return;
+        
     int detector_result = detector(input_image_);
     if (detector_result != 0)
         publishResult();
