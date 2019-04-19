@@ -40,8 +40,8 @@ BehaviorDemo::~BehaviorDemo()
 void BehaviorDemo::parseJointName(string path)
 {
     printf("parseJointName\n");
-    id_joint_table_[7] = head_tilt_name_;
-    id_joint_table_[11] = head_pan_name_;
+    module_joint_table_[head_tilt_name_] = "head_control_module";
+    module_joint_table_[head_pan_name_] = "head_control_module";
 }
 
 void BehaviorDemo::callbackThread()
@@ -117,15 +117,16 @@ void BehaviorDemo::setModuleToDemo(const std::string module_name)
     if (enable_ == false)
         return;
 
-    // shared_ptr<robotis_controller_msgs::msg::JointCtrlModule> control_msg;
     auto control_msg = std::make_shared<robotis_controller_msgs::msg::JointCtrlModule>();
-    // robotis_controller_msgs::msg::JointCtrlModule control_msg;
-    map<int, string>::iterator joint_iter = id_joint_table_.begin();
+    map<string, string>::iterator joint_iter = module_joint_table_.begin();
     
-    for (; joint_iter != id_joint_table_.end(); joint_iter++)
+    for (; joint_iter != module_joint_table_.end(); joint_iter++)
     {
-        control_msg->joint_name.push_back(joint_iter->second);
-        control_msg->module_name.push_back(module_name);
+        if (joint_iter->second == module_name)
+        {
+            control_msg->joint_name.push_back(joint_iter->first);
+            control_msg->module_name.push_back(module_name);
+        }
     }
 
     if (control_msg->joint_name.size() == 0)

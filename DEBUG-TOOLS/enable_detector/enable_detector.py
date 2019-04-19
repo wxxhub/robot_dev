@@ -9,6 +9,7 @@ def main(args=None):
 
     node = rclpy.create_node('minimal_publisher')
     client = node.create_client(SetBool, '/road_detector/enable')
+    # client = node.create_client(SetBool, '/ball_lab_detector/enable')
 
     req = SetBool.Request()
     req.data = True

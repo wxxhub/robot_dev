@@ -67,7 +67,7 @@ private:
     const int spin_rate_;
     const double head_offset_ratio_;
 
-    std::map<int, std::string> id_joint_table_;
+    std::map<std::string, std::string> module_joint_table_;
 
     BallInfo ball_info_;
 

@@ -49,16 +49,10 @@ ament_target_dependencies(
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(ball_lab_detector PRIVATE "BALL_LAB_DETECTOR_BUILDING_LIBRARY")
 
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
-install(
-  TARGETS ball_lab_detector
-  EXPORT export_${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+target_link_libraries(${PROJECT_NAME}
+  boost_system
+  boost_thread
+  ${Boost_LIBRARIES}
 )
 
 add_executable(ball_lab_detector_node src/ball_lab_detector_node.cpp)
@@ -76,6 +70,18 @@ target_include_directories(ball_lab_detector_usbcam PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(ball_lab_detector_usbcam ball_lab_detector)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+install(
+  TARGETS ball_lab_detector
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 install(TARGETS ball_lab_detector_usbcam
   EXPORT export_${PROJECT_NAME}

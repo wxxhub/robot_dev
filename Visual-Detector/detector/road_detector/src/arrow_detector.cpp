@@ -8,7 +8,7 @@ using namespace cv;
 ArrowDetector::ArrowDetector()
     : background_threshold_(128)
 {
-
+    
 }
 
 ArrowDirection ArrowDetector::getDirection(Mat mark_image, bool wite_background)

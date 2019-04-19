@@ -3,7 +3,7 @@
 #include <opencv2/highgui.hpp>
 // #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
-// #include <boost/thread.hpp>
+#include <boost/thread.hpp>
 #include "rclcpp/rclcpp.hpp"
 
 #include "ball_lab_detector/visibility_control.h"
@@ -22,7 +22,7 @@ enum Color
   YELLOW
 };
 
-class BallLabDetector : public rclcpp::Node
+class BallLabDetector
 {
 public:
   BallLabDetector();
@@ -31,6 +31,7 @@ public:
   // cv
   void process(cv::Mat image);
   void process();
+  void noedThread();
 
   int detector(cv::Mat image);
 
@@ -43,6 +44,7 @@ public:
                     const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
 private:
+  boost::thread node_thread_;
   cv::Mat input_image_;
   bool new_image_;
   bool show_result_;

@@ -44,7 +44,7 @@ public:
 	}
 };
 
-class RoadDetector : public rclcpp::Node
+class RoadDetector
 {
 public:
   RoadDetector();
@@ -53,6 +53,7 @@ public:
   // cv 
   void process(cv::Mat image);
   void process();
+  void noedThread();
   int detector(cv::Mat image);
   bool getRoad(cv::Mat road_lab, cv::Point2f &up_point, cv::Point2f &down_point, float &road_angle);
   bool getMarkImage(cv::Mat mark_image, float &road_angle);
@@ -62,6 +63,7 @@ public:
   int encodingToMatType(const std::string & encoding);
 
 private:
+  boost::thread node_thread_;
   ResultInfo result_;
   cv::RotatedRect road_rect_;
   cv::Mat input_image_;

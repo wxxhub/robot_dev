@@ -8,24 +8,38 @@ using namespace detector_module;
 
 RoadDetector::RoadDetector()
     : new_image_(false),
-      Node("road_detector"),
       road_color(RED),
       show_result_(true),
       mark_detector_(false),
       wite_background_(true),
       mark_rect_width_(120),
       half_mark_rect_width_(mark_rect_width_/2),
-      enable_(true)
+      enable_(false)
 {
-    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
+    detector_node_ = rclcpp::Node::make_shared("road_detector");
+    image_sub_ = detector_node_->create_subscription<sensor_msgs::msg::Image>("/usb_cam_pub/image0", std::bind(&RoadDetector::imageCallback, this, std::placeholders::_1));
 
-    result_pub_ = this->create_publisher<detector_msgs::msg::RoadResult>("/road_detector/result");
+    result_pub_ = detector_node_->create_publisher<detector_msgs::msg::RoadResult>("/road_detector/result");
 
-    enable_server_ = this->create_service<std_srvs::srv::SetBool>("/road_detector/enable", std::bind(&RoadDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    enable_server_ = detector_node_->create_service<std_srvs::srv::SetBool>("/road_detector/enable", std::bind(&RoadDetector::enableServer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+    node_thread_ = boost::thread(std::bind(&RoadDetector::noedThread, this));
 }
 
 RoadDetector::~RoadDetector()
 {
+    
+}
+
+void RoadDetector::noedThread()
+{
+    rclcpp::WallRate loop_rate(60);
+
+    while(rclcpp::ok())
+    {
+        rclcpp::spin_some(detector_node_);
+        loop_rate.sleep();
+    }
     
 }
 

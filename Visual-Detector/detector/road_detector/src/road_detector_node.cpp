@@ -3,6 +3,7 @@
 #include "road_detector/road_detector.h"
 
 using namespace cv;
+using namespace detector_module;
 
 int main(int argc, char ** argv)
 {
@@ -18,14 +19,12 @@ int main(int argc, char ** argv)
 	}
   
   Mat image;
-  auto road_detector = std::make_shared<detector_module::RoadDetector>();
+  RoadDetector* road_detector = new RoadDetector();
   road_detector->setShowResult(true);
   while(rclcpp::ok())
   {
     cap>>image;
-    rclcpp::spin_some(road_detector);
     road_detector->process(image);
-    loop_rate.sleep();
   }
   
   return 0;

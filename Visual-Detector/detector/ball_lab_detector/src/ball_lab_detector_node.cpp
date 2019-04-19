@@ -4,13 +4,13 @@
 #include "timer/timer.hpp"
 
 using namespace cv;
+using namespace detector_module;
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
 
   VideoCapture cap(0);
-  rclcpp::WallRate loop_rate(30);
 
   if(!cap.isOpened())
 	{
@@ -20,12 +20,11 @@ int main(int argc, char ** argv)
   
   Mat image;
   Timer timer;
-  auto ball_lab_detector = std::make_shared<detector_module::BallLabDetector>();
+  BallLabDetector* ball_lab_detector = new BallLabDetector();  
   ball_lab_detector->setShowResult(true);
   while(rclcpp::ok())
   {
     cap>>image;
-    rclcpp::spin_some(ball_lab_detector);
   #ifdef DEBUG_TIME
     timer.reset();
   #endif
@@ -33,12 +32,6 @@ int main(int argc, char ** argv)
   #ifdef DEBUG_TIME
     timer.stop();
     timer.show();
-    timer.reset();
-  #endif
-    loop_rate.sleep();
-  #ifdef DEBUG_TIME
-    timer.stop();
-    printf("sleep time: %fms\n", timer.elapsed());
   #endif
   }
   
