@@ -1,5 +1,8 @@
 # QR Code Detector
 
+#### 安装zbar库  
+> sudo apt-get install libzbar-dev  
+
 #### 关键参数
 > 关键参数请在 **qrcode_detector.cpp** 中的 **QRCodeDetector::QRCodeDetector** 中修改  
 > **show_result_** 是否显示结果，可以通过 **setShowResult（）** 重新设计  
