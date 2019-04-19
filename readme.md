@@ -39,6 +39,11 @@ colcon build --symlink-install
 ros2 topic pub /robotis/head_control/scan_command std_msgs/String "data: scan" # 终端发布消息
 ```
 
+#### 设置串口权限  
+> sudo gedit /etc/udev/rules.d/70-ttyusb.rules  
+> 添加： KERNEL=="ttyUSB[0-9]*",MODE="0666"  
+> 保存，重新插入串口  
+
 #### 弃用模块 
 > online_walking_module 结果比较复杂, 几乎不使用   
 > tuning_module 暂时没有用途  
