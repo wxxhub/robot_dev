@@ -41,12 +41,18 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
+
 install(
   TARGETS robotis_device
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
+)
+
+install(
+  DIRECTORY devices
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 if(BUILD_TESTING)

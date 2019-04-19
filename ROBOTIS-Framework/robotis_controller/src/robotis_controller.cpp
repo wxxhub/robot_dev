@@ -21,12 +21,14 @@ RobotisController::RobotisController()
 
 bool RobotisController::initialize(const std::string robot_file_path, const std::string init_file_path)
 {
-  // std::string dev_desc_dir_path = ros::package::getPath("robotis_device") + "/devices";
-
   RCLCPP_INFO(robot_node_->get_logger(), "robot init");
-  std::string dev_desc_dir_path;
-  dev_desc_dir_path = "/home/wxx/robot_dev/src/ROBOTIS-Framework/robotis_device";
-  dev_desc_dir_path = dev_desc_dir_path + "/devices";
+  std::string dev_desc_dir_path = "";
+  try
+  {
+      dev_desc_dir_path = ament_index_cpp::get_package_share_directory("robotis_device")+"/devices";
+  } catch (const std::exception& e) {
+      std::cerr << e.what() << '\n';
+  }
 
   // load robot info : port , device
   robot_ = new Robot(robot_file_path, dev_desc_dir_path);

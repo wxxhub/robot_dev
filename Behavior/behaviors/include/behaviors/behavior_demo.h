@@ -65,7 +65,8 @@ private:
     rclcpp::Subscription<detector_msgs::msg::BallDetector>::SharedPtr ball_sub_;
 
     const int spin_rate_;
-    const double head_offset_ratio_;
+    const double head_offset_y_ratio_;
+    const double head_offset_x_ratio_;
 
     std::map<std::string, std::string> module_joint_table_;
 

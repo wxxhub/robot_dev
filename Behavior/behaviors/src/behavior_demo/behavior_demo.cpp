@@ -7,7 +7,8 @@ BehaviorDemo::BehaviorDemo()
     : spin_rate_(60),
       head_pan_name_("head_pan"),
       head_tilt_name_("head_tilt"),
-      head_offset_ratio_(1.0)
+      head_offset_y_ratio_(0.5),
+      head_offset_x_ratio_(-0.6)
 {
     // init
     enable_ = false;
@@ -98,14 +99,16 @@ void BehaviorDemo::process()
         ball_info_.update = false;
         sensor_msgs::msg::JointState set_offset_msg;
 
-        double x_offset = (ball_info_.position_x - ball_info_.image_width / 2.0) / ball_info_.image_width;
-        double y_offset = (ball_info_.position_y - ball_info_.image_height / 2.0) / ball_info_.image_height;
+        // (x-w/2.0)/(w/2.0) = (2.0x-w)/w
+
+        double x_offset = (ball_info_.position_x * 2.0 - ball_info_.image_width) / ball_info_.image_width;
+        double y_offset = (ball_info_.position_y * 2.0 - ball_info_.image_height) / ball_info_.image_height;
 
         set_offset_msg.name.push_back(head_pan_name_);
         set_offset_msg.name.push_back(head_tilt_name_);
 
-        set_offset_msg.position.push_back(x_offset * head_offset_ratio_);
-        set_offset_msg.position.push_back(y_offset * head_offset_ratio_);
+        set_offset_msg.position.push_back(x_offset * head_offset_x_ratio_);
+        set_offset_msg.position.push_back(y_offset * head_offset_y_ratio_);
 
         head_control_pub_->publish(set_offset_msg);
         printf("publised image:(%d, %d), ball:(%d, %d, %d)\n", ball_info_.image_width, ball_info_.image_height, ball_info_.position_x, ball_info_.position_y, ball_info_.radius);
