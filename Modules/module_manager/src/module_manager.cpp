@@ -36,11 +36,8 @@ const int SUB_CONTROLLER_ID = 200;
 const int DXL_BROADCAST_ID = 254;
 const int DEFAULT_DXL_ID = 1;
 const int DEVICE_NUMBER = 4; //串口数量
-const std::string SUB_CONTROLLER_DEVICE0 = "/dev/ttyUSB0";
-const std::string SUB_CONTROLLER_DEVICE1 = "/dev/ttyUSB1";
-const std::string SUB_CONTROLLER_DEVICE2 = "/dev/ttyUSB2";
-const std::string SUB_CONTROLLER_DEVICE3 = "/dev/ttyUSB3";
 const std::string NONE_STRING = "";
+const std::string default_g_device_name = "/dev/ttyUSB0";
 const int POWER_CTRL_TABLE = 24;
 const int RGB_LED_CTRL_TABLE = 26;
 const int TORQUE_ON_CTRL_TABLE = 64;
@@ -78,7 +75,7 @@ int main(int argc, char ** argv)
   manager_node->get_parameter_or("offset_file_path", g_offset_file, NONE_STRING);
   manager_node->get_parameter_or("robot_file_path", g_robot_file, NONE_STRING);
   manager_node->get_parameter_or("init_file_path", g_init_file, NONE_STRING);
-  manager_node->get_parameter_or("device_name",g_device_name, SUB_CONTROLLER_DEVICE0);
+  manager_node->get_parameter_or("device_name",g_device_name, default_g_device_name);
   manager_node->get_parameter_or("baud_rate", g_baudrate, BAUD_RATE);
   manager_node->get_parameter_or("gazebo", controller->gazebo_mode_, false);
   std::cout<<"g_device_name: "<<g_device_name<<std::endl;
@@ -103,30 +100,11 @@ int main(int argc, char ** argv)
       set_port_result = port_handler->setBaudRate(BAUD_RATE);
       if (set_port_result == false)
       {
-        RCLCPP_ERROR(manager_node->get_logger(),"Error Set port! change to device %d", set_port_times%DEVICE_NUMBER);
         set_port_times++;
-        switch (set_port_times%DEVICE_NUMBER)
-        {
-          case 0:
-            g_device_name = SUB_CONTROLLER_DEVICE0;
-            break;
-
-          case 1:
-            g_device_name = SUB_CONTROLLER_DEVICE1;
-            break;
-
-          case 2:
-            g_device_name = SUB_CONTROLLER_DEVICE2;
-            break;
-
-          case 3:
-            g_device_name = SUB_CONTROLLER_DEVICE3;
-            break;
-        
-          default:
-            RCLCPP_ERROR(manager_node->get_logger(),"please reset DEVICE_NUMBER");
-            break;
-        }
+        char new_port[16];
+        sprintf(new_port, "/dev/ttyUSB%d", set_port_times%DEVICE_NUMBER);
+        g_device_name = std::string(new_port);
+        RCLCPP_ERROR(manager_node->get_logger(),"Error Set port! change to decice %s", g_device_name.c_str());
         usleep(1000 * 1000);
       }
 
