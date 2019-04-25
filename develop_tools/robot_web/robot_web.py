@@ -1,13 +1,14 @@
 #coding:utf-8
 
 import rclpy
+import sys
 from app.app import createApp
+from app.ros_node.ros_node import RosNode
 
-app = createApp()
-
-def main(args=None):
-    app.run()
-    print ("Hello World")
+def main():
+    RosNode.run()
+    app = createApp(sys.argv)
+    app.run('0.0.0.0')
 
 if __name__ == '__main__':
     main()

@@ -16,7 +16,9 @@
 
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 #include "detector_msgs/msg/ball_detector.hpp"
+#include "detector_msgs/srv/ball_set_params.hpp"
 #include "ball_hsv_detector/ball_detector_config.h"
 
 namespace detector_module
@@ -30,7 +32,7 @@ enum Color
   YELLOW
 };
 
-class BallHsvDetector : public rclcpp::Node
+class BallHsvDetector
 {
 public:
   BallHsvDetector();
@@ -52,6 +54,7 @@ public:
 
 private:
   cv::Mat input_image_;
+  bool enable_;
   bool new_image_;
   bool show_result_;
   bool have_ball_;
@@ -66,7 +69,8 @@ private:
   int ball_y_;
   int ball_radius_;
 
-  HsvFilter hsv_filter1_;
+  HsvFilter *hsv_filter1_;
+  HsvFilter *backgroud_filter_;
 
   std::string default_setting_path_;
 
@@ -75,9 +79,19 @@ private:
 
   rclcpp::Publisher<detector_msgs::msg::BallDetector>::SharedPtr result_pub_;
 
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr enable_server_;
+  rclcpp::Service<detector_msgs::srv::BallSetParams>::SharedPtr params_ser_;
+
   // ros2
+  void noedThread();
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
   void publishResult();
+  void enableServer(const std::shared_ptr<rmw_request_id_t> request_header,
+                    const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                    const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
+  void setParamsServer(const std::shared_ptr<rmw_request_id_t> request_header,
+                    const std::shared_ptr<detector_msgs::srv::BallSetParams::Request> request,
+                    const std::shared_ptr<detector_msgs::srv::BallSetParams::Response> response);
 };
 
 }  // namespace ball_hsv_detector

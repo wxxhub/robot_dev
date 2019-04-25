@@ -17,6 +17,8 @@ find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "ball_detector_msgs/msg/BallDetector.msg"
+  "ball_detector_msgs/msg/BallDetectorParams.msg"
+  "ball_detector_msgs/srv/BallSetParams.srv"
   "qrcode_detector_msgs/msg/QRCodeMsg.msg"
   "qrcode_detector_msgs/msg/QRCodeListMsg.msg"
   "road_detector_msgs/msg/RoadResult.msg"

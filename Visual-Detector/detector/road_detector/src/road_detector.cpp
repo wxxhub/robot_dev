@@ -10,7 +10,7 @@ RoadDetector::RoadDetector()
     : new_image_(false),
       road_color(RED),
       show_result_(true),
-      mark_detector_(false),
+      mark_detector_(true),
       wite_background_(true),
       mark_rect_width_(120),
       half_mark_rect_width_(mark_rect_width_/2),
@@ -181,6 +181,9 @@ int RoadDetector::detector(Mat image)
     if (!getMarkImage(mark_image, road_angle))
         return 2;
     
+    if (mark_image.empty())
+        return 3;
+        
     result_.mark_image = mark_image.clone();
     ArrowDirection direction_result = arrow_detector_.getDirection(mark_image, wite_background_);
     if (direction_result != ERROR)

@@ -1,0 +1,22 @@
+<style>
+.nav li{
+    float: left;
+    background: yellow;
+}
+
+.nav{
+    background: blueviolet;
+}
+</style>
+
+<div class="nav">
+    <ul style="list-style-type:none;">
+        <!-- 遍历所有 nav_items -->
+        {% for item in nav_items %}
+            <li>
+                <a href="{{ nav_items[item] }}">{{ item }}</a>
+            </li>
+        {% endfor %}
+        
+    </ul>
+</div>

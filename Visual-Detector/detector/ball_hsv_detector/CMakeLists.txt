@@ -21,6 +21,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -53,6 +54,7 @@ ament_target_dependencies(
   "rclcpp"
   "sensor_msgs"
   "std_msgs"
+  "std_srvs"
   "OpenCV"
   "Boost"
   "yaml-cpp"
