@@ -1,1 +1,0 @@
-QRCodeMsg[] message_list
