@@ -13,7 +13,7 @@
 ```
 mkdir robot_dev
 cd robot_dev
-git clone http://218.199.176.173:88/wxx/ros2_robot.git src
+git clone git@github.com:wxxhub/robot_dev.git src
 colcon build --symlink-install
 ```
 
