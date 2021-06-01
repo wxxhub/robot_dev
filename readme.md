@@ -18,14 +18,14 @@ colcon build --symlink-install
 ```
 
 #### Install
-> 在install中安装文件夹，比如安装launch 文件夹  
-> **Install launch files.**
-> ````
-> install(
->  DIRECTORY launch
->  DESTINATION share/${PROJECT_NAME}/
-> )
-> ````
+```
+##在install中安装文件夹，比如安装launch 文件夹  
+##**Install launch files.**
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+````
 
 #### 目录
 > [新增功能](Explain/new_function.md)  
@@ -40,9 +40,11 @@ ros2 topic pub /robotis/head_control/scan_command std_msgs/String "data: scan" #
 ```
 
 #### 设置串口权限  
-> sudo gedit /etc/udev/rules.d/70-ttyusb.rules  
-> 添加： KERNEL=="ttyUSB[0-9]*",MODE="0666"  
-> 保存，重新插入串口  
+```
+sudo gedit /etc/udev/rules.d/70-ttyusb.rules  
+## 添加： KERNEL=="ttyUSB[0-9]*",MODE="0666"  
+## 保存，重新插入串口  
+```
 
 #### 弃用模块 
 > online_walking_module 结果比较复杂, 几乎不使用   
